@@ -60,22 +60,6 @@ fn replace_written_digits(input: &str) -> String {
     }
 
     return result;
-
-    
-    // let mut temp = String::new();
-    // for ch in input.chars() {
-    //     temp.push(ch);
-    //     for &(digit, num) in &replacements {
-    //         if temp.ends_with(digit) {
-    //             let t = temp.replace(digit, num);
-    //             result.push_str(&t);
-    //             temp.clear();
-    //             break;
-    //         }
-    //     }
-    // }
-    // result.push_str(&temp);  // append remaining characters
-    // result
 }
 
 pub fn task2() {
