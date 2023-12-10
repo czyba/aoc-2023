@@ -20,4 +20,5 @@ fn main() {
     day6::task1();
     day6::task2();
     day7::task1();
+    day7::task2();
 }
