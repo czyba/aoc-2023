@@ -8,7 +8,7 @@ fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item 
     Ok(reader.lines().map(|l| l.expect("Could not parse line")))
 }
 
-const DIGITS: [(&'static str, i32); 10] = [
+const DIGITS: [(&str, i32); 10] = [
     ("0", 0),
     ("1", 1),
     ("2", 2),
@@ -21,7 +21,7 @@ const DIGITS: [(&'static str, i32); 10] = [
     ("9", 9),
 ];
 
-const DIGITS_INCLUDING_WRITTEN_OUT_DIGITS: [(&'static str, i32); 19] = [
+const DIGITS_INCLUDING_WRITTEN_OUT_DIGITS: [(&str, i32); 19] = [
     ("0", 0),
     ("1", 1),
     ("2", 2),
@@ -65,16 +65,16 @@ impl<'a, T: Clone> Iterator for InOrderReplacer<'a, T> {
                 }
             }
         }
-        return None;
+        None
     }
 }
 
 fn replacer<'a, T>(input: &'a str, replacements: &'a [(&'a str, T)]) -> InOrderReplacer<'a, T> {
-    return InOrderReplacer {
+    InOrderReplacer {
         input,
         replacements,
         current: 0,
-    };
+    }
 }
 
 fn calculate_value(replacements: &[(&str, i32)]) {
@@ -82,7 +82,7 @@ fn calculate_value(replacements: &[(&str, i32)]) {
         .unwrap()
         .map(|line| {
             replacer(&line, replacements).fold(None, |acc, val| {
-                acc.or_else(|| Some((val, val))).map(|v| (v.0, val))
+                acc.or(Some((val, val))).map(|v| (v.0, val))
             })
         })
         .map(|p| p.map(|(l, r)| l * 10 + r).unwrap_or(0))
