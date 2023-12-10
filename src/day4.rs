@@ -110,5 +110,5 @@ pub fn task2() {
         }
     }
 
-    print!("{:?}", card_counts.iter().sum::<u64>());
+    println!("{:?}", card_counts.iter().sum::<u64>());
 }
