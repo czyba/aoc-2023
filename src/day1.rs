@@ -8,7 +8,7 @@ fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item 
     Ok(reader.lines().map(|l| l.expect("Could not parse line")))
 }
 
-const DIGITS : [(&'static str, i32); 10] = [
+const DIGITS: [(&'static str, i32); 10] = [
     ("0", 0),
     ("1", 1),
     ("2", 2),
@@ -21,31 +21,31 @@ const DIGITS : [(&'static str, i32); 10] = [
     ("9", 9),
 ];
 
-const DIGITS_INCLUDING_WRITTEN_OUT_DIGITS : [(&'static str, i32); 19] = [
-            ("0", 0),
-            ("1", 1),
-            ("2", 2),
-            ("3", 3),
-            ("4", 4),
-            ("5", 5),
-            ("6", 6),
-            ("7", 7),
-            ("8", 8),
-            ("9", 9),
-            ("one", 1),
-            ("two", 2),
-            ("three", 3),
-            ("four", 4),
-            ("five", 5),
-            ("six", 6),
-            ("seven", 7),
-            ("eight", 8),
-            ("nine", 9),
-        ];
+const DIGITS_INCLUDING_WRITTEN_OUT_DIGITS: [(&'static str, i32); 19] = [
+    ("0", 0),
+    ("1", 1),
+    ("2", 2),
+    ("3", 3),
+    ("4", 4),
+    ("5", 5),
+    ("6", 6),
+    ("7", 7),
+    ("8", 8),
+    ("9", 9),
+    ("one", 1),
+    ("two", 2),
+    ("three", 3),
+    ("four", 4),
+    ("five", 5),
+    ("six", 6),
+    ("seven", 7),
+    ("eight", 8),
+    ("nine", 9),
+];
 
 pub struct InOrderReplacer<'a, T> {
     input: &'a str,
-    replacements: &'a[(&'a str, T)],
+    replacements: &'a [(&'a str, T)],
     current: usize,
 }
 
@@ -69,7 +69,7 @@ impl<'a, T: Clone> Iterator for InOrderReplacer<'a, T> {
     }
 }
 
-fn replacer<'a, T>(input: &'a str, replacements:  &'a [(&'a str, T)]) -> InOrderReplacer<'a, T> {
+fn replacer<'a, T>(input: &'a str, replacements: &'a [(&'a str, T)]) -> InOrderReplacer<'a, T> {
     return InOrderReplacer {
         input,
         replacements,
@@ -77,18 +77,16 @@ fn replacer<'a, T>(input: &'a str, replacements:  &'a [(&'a str, T)]) -> InOrder
     };
 }
 
-fn calculate_value(replacements:  &[(&str, i32)]) {
-    let c = lines_from_file("src/day1_task1.txt").unwrap()
+fn calculate_value(replacements: &[(&str, i32)]) {
+    let c = lines_from_file("src/day1_task1.txt")
+        .unwrap()
         .map(|line| {
-            replacer(&line, replacements)
-                .fold(None, |acc, val| {
-                    acc.or_else(|| Some((val, val)))
-                        .map(|v| (v.0, val))
-                })
-        }).map(|p| {
-            p.map(|(l,r)| l * 10 + r)
-                .unwrap_or(0)
-        }).fold(0, i32::wrapping_add);
+            replacer(&line, replacements).fold(None, |acc, val| {
+                acc.or_else(|| Some((val, val))).map(|v| (v.0, val))
+            })
+        })
+        .map(|p| p.map(|(l, r)| l * 10 + r).unwrap_or(0))
+        .fold(0, i32::wrapping_add);
 
     println!("{}", c);
 }
