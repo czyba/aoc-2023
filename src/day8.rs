@@ -110,7 +110,10 @@ pub fn task2() {
         .iter()
         .map(|start| foo(&graph, &directions, start))
         .collect_vec();
-    println!("Day  8, Task 2:{:?}", a.iter().product::<u64>() * directions.len() as u64);
+    println!(
+        "Day  8, Task 2:{:?}",
+        a.iter().product::<u64>() * directions.len() as u64
+    );
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
