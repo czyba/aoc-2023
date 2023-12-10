@@ -12,9 +12,13 @@ trait Task1 {
     fn calculate_value(&self) -> u32;
 }
 
+trait Task2 {
+    fn calculate_num_matches(&self) -> u32;
+}
+
 #[derive(Debug)]
 struct Card {
-    id: u32,
+    _id: u32,
     winning_numbers: Vec<u32>,
     own_numbers: Vec<u32>,
 }
@@ -37,6 +41,15 @@ impl Task1 for Card {
     }
 }
 
+impl Task2 for Card {
+    fn calculate_num_matches(&self) -> u32 {
+        self.own_numbers
+            .iter()
+            .filter(|&num| self.winning_numbers.contains(num))
+            .count() as u32
+    }
+}
+
 fn parse_card(line: &str) -> Card {
     let mut iter = line.split(':');
     let id = iter
@@ -50,7 +63,7 @@ fn parse_card(line: &str) -> Card {
     let card_content = iter.next().unwrap();
     let (winning_numbers, own_numbers) = parse_card_content(card_content);
     Card {
-        id,
+        _id: id,
         winning_numbers,
         own_numbers,
     }
@@ -80,4 +93,22 @@ pub fn task1() {
         .sum();
 
     println!("{}", value);
+}
+
+pub fn task2() {
+    let cards: Vec<Card> = lines_from_file("src/day4.txt")
+        .unwrap()
+        .map(|line| parse_card(&line))
+        .collect();
+
+    let mut card_counts = vec![1_u64; cards.len()];
+
+    for (index, card) in cards.iter().enumerate() {
+        let value = card.calculate_num_matches() as usize;
+        for current_index in (index + 1)..=(usize::min(index + value, card_counts.len())) {
+            card_counts[current_index] += card_counts[index];
+        }
+    }
+
+    print!("{:?}", card_counts.iter().sum::<u64>());
 }
