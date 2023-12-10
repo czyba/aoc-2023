@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+use itertools::Itertools;
+
 enum Direction {
     Left,
     Right,
@@ -92,4 +94,63 @@ pub fn task1() {
     }
 
     println!("Day  8, Task 1:{}", steps);
+}
+
+pub fn task2() {
+    let (graph, directions) = parse();
+
+    let current_nodes: Vec<&String> = graph
+        .nodes
+        .keys()
+        .filter(|key| key.ends_with('A'))
+        .collect();
+
+    // This only works, because the loops all start after 3 nodes, and the final node is the 3rd last of the loop...
+    let a = current_nodes
+        .iter()
+        .map(|start| foo(&graph, &directions, start))
+        .collect_vec();
+    println!("Day  8, Task 2:{:?}", a.iter().product::<u64>() * directions.len() as u64);
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+struct State<'a> {
+    lr_index: usize,
+    key: &'a String,
+}
+
+fn foo(graph: &Graph, directions: &Vec<Direction>, start: &String) -> u64 {
+    let mut states: HashMap<State, u64> = HashMap::new();
+    let mut current: &String = start;
+    let mut state = State {
+        lr_index: 0,
+        key: current,
+    };
+    let mut path_index = 0;
+    let loop_size;
+
+    'outer: loop {
+        for (index, direction) in directions.iter().enumerate() {
+            states.insert(state.clone(), path_index);
+            match direction {
+                Direction::Left => {
+                    current = &graph.nodes.get(current).unwrap().left_key;
+                }
+                Direction::Right => {
+                    current = &graph.nodes.get(current).unwrap().right_key;
+                }
+            }
+            state = State {
+                lr_index: (index + 1) % directions.len(),
+                key: current,
+            };
+            path_index += 1;
+            if states.contains_key(&state) {
+                loop_size = path_index - states.get(&state).unwrap();
+                break 'outer;
+            }
+        }
+    }
+
+    loop_size / (directions.len() as u64)
 }
