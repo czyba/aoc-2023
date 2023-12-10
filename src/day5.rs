@@ -1,7 +1,9 @@
+use itertools::Itertools;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::prelude::Read;
 use std::io::Result;
+use std::ops::Range;
 
 struct ParsedInput {
     seeds: Vec<u64>,
@@ -23,6 +25,19 @@ impl ParsedInput {
         let temperature = self.light_temperator_map.map(light);
         let humidity = self.temperature_humidity_map.map(temperature);
         self.humidity_location_map.map(humidity)
+    }
+
+    fn map_range(&self, range: &Range<u64>) -> Vec<Range<u64>> {
+        self.seed_soil_map
+            .map_range(range)
+            .iter()
+            .flat_map(|r| self.soil_fertilizer_map.map_range(r))
+            .flat_map(|r| self.fertilizer_waper_map.map_range(&r))
+            .flat_map(|r| self.water_light_map.map_range(&r))
+            .flat_map(|r| self.light_temperator_map.map_range(&r))
+            .flat_map(|r| self.temperature_humidity_map.map_range(&r))
+            .flat_map(|r| self.humidity_location_map.map_range(&r))
+            .collect()
     }
 }
 
@@ -57,6 +72,40 @@ impl RangeMap {
             .unwrap();
 
         (entry.1 + value) - entry.0
+    }
+
+    fn map_range(&self, range: &Range<u64>) -> Vec<Range<u64>> {
+        let mut r = Vec::new();
+
+        let mut current_value = range.start;
+        let mut iter = self.map.iter();
+        let mut last_entry = iter.next().unwrap();
+        for current_entry in iter {
+            if *current_entry.0 < range.start {
+                last_entry = current_entry;
+                continue;
+            }
+            let start = current_value;
+            let end = u64::min(range.end, *current_entry.0);
+            r.push(Range {
+                start: (last_entry.1 + start) - last_entry.0,
+                end: (last_entry.1 + end) - last_entry.0,
+            });
+            last_entry = current_entry;
+            current_value = end;
+            if current_value >= range.end {
+                return r;
+            }
+        }
+
+        let start = current_value;
+        let end = range.end;
+        r.push(Range {
+            start: (last_entry.1 + start) - last_entry.0,
+            end: (last_entry.1 + end) - last_entry.0,
+        });
+
+        r
     }
 }
 
@@ -122,6 +171,30 @@ pub fn task1() {
     println!("Day 5, Task 1: {}", min_location);
 }
 
+pub fn task2() {
+    let parsed_input = parse();
+
+    let min_location = parsed_input
+        .seeds
+        .iter()
+        .chunks(2)
+        .into_iter()
+        .map(|mut chunk| {
+            let start = *chunk.next().unwrap();
+            let size = chunk.next().unwrap();
+            Range {
+                start,
+                end: start + size,
+            }
+        })
+        .flat_map(|range| parsed_input.map_range(&range))
+        .map(|range| range.start)
+        .min()
+        .unwrap();
+
+    println!("Day 5, Task 2: {}", min_location);
+}
+
 #[cfg(test)]
 mod test {
 
@@ -139,5 +212,41 @@ mod test {
         assert_eq!(51, rm.map(99));
         assert_eq!(52, rm.map(50));
         assert_eq!(55, rm.map(53));
+    }
+
+    #[test]
+    fn test_range() {
+        let mut rm = RangeMap::new();
+        rm.add_range(10, 10, 110);
+        rm.add_range(90, 10, 10);
+
+        let mut mapped = rm.map_range(&Range { start: 0, end: 110 });
+        mapped.sort_by(|l, r| l.start.cmp(&r.start));
+
+        assert_eq!(
+            mapped,
+            vec![
+                Range { start: 0, end: 10 },
+                Range { start: 10, end: 20 },
+                Range { start: 20, end: 90 },
+                Range {
+                    start: 100,
+                    end: 110
+                },
+                Range {
+                    start: 110,
+                    end: 120
+                },
+            ]
+        );
+
+        let mapped = rm.map_range(&Range { start: 13, end: 17 });
+        assert_eq!(
+            mapped,
+            vec![Range {
+                start: 113,
+                end: 117
+            }]
+        )
     }
 }
