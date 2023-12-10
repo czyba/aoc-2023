@@ -1,5 +1,3 @@
-
-
 use std::fs::File;
 use std::io::prelude::Read;
 use std::io::Result;
