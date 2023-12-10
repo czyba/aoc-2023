@@ -28,6 +28,21 @@ pub fn task1() {
     println!("{}", sum);
 }
 
+pub fn task2() {
+    let games: Vec<Game> = lines_from_file("src/day2.txt")
+        .unwrap()
+        .map(|l| line_to_game(&l))
+        .collect();
+
+    let sum: u32 = games
+        .iter()
+        .map(|game| game.min_round())
+        .map(|r| r.red * r.blue * r.green)
+        .sum();
+
+    println!("{}", sum);
+}
+
 fn line_to_game(line: &str) -> Game {
     let index = &line[5..];
     let mut iter = index.split(':');
@@ -98,5 +113,25 @@ impl Game {
         self.rounds
             .iter()
             .all(|round| round.is_possible(configuration))
+    }
+
+    fn min_round(&self) -> Round {
+        let mut min_round = Round {
+            red: 0,
+            blue: 0,
+            green: 0,
+        };
+        self.rounds.iter().for_each(|r| {
+            if r.blue > min_round.blue {
+                min_round.blue = r.blue;
+            }
+            if r.red > min_round.red {
+                min_round.red = r.red;
+            }
+            if r.green > min_round.green {
+                min_round.green = r.green;
+            }
+        });
+        min_round
     }
 }
