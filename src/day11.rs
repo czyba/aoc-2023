@@ -106,3 +106,62 @@ fn expand_cols(space: &mut Space) {
         index += 1;
     }
 }
+
+pub fn task2() {
+    let space = parse();
+    let row_values = calculate_row_values(&space);
+    let col_values = calculate_column_values(&space);
+    let galaxies = find_galaxies(&space);
+    let sum_distance = calulate_distances_2(&galaxies, row_values, col_values);
+
+    println!("Day 11, Task 1: {}", sum_distance);
+}
+
+fn calulate_distances_2(
+    galaxies: &[(usize, usize)],
+    row_values: Vec<u64>,
+    col_values: Vec<u64>,
+) -> u64 {
+    let len = galaxies.len();
+
+    let mut res = 0;
+
+    for i in 0..len {
+        let start = galaxies[i];
+        for end in galaxies.iter().take(len).skip(i + 1) {
+            let mut distance: u64 = row_values[start.0.min(end.0)..start.0.max(end.0)]
+                .iter()
+                .sum();
+            distance += col_values[start.1.min(end.1)..start.1.max(end.1)]
+                .iter()
+                .sum::<u64>();
+            res += distance;
+        }
+    }
+    res
+}
+
+fn calculate_row_values(space: &Space) -> Vec<u64> {
+    space
+        .iter()
+        .map(|line| {
+            if line.iter().all(|t| *t == SpaceType::Empty) {
+                1000000
+            } else {
+                1
+            }
+        })
+        .collect()
+}
+
+fn calculate_column_values(space: &Space) -> Vec<u64> {
+    (0..space.len())
+        .map(|i| {
+            if space.iter().all(|line| line[i] == SpaceType::Empty) {
+                1000000
+            } else {
+                1
+            }
+        })
+        .collect()
+}
