@@ -224,3 +224,118 @@ fn find_start_or_loop_or_empty(grid: &[Vec<Field>], start_state: State) -> Optio
         }
     }
 }
+
+pub fn task2() {
+    let grid = parse();
+
+    let start_pos = grid
+        .iter()
+        .enumerate()
+        .map(|(line, vec)| {
+            vec.iter()
+                .enumerate()
+                .find(|(_, &connection)| connection == Field::Start)
+                .map(|x| (line, x.0))
+        })
+        .find(Option::is_some)
+        .flatten()
+        .unwrap();
+
+    // Already know which one is the correct direction.
+    let mut enclosure_grid = create_initial_enclosure_map(&grid, start_pos);
+    calculate_outside_fields(&mut enclosure_grid);
+
+    let mut count = 0;
+    for line in 0..grid.len() {
+        for col in 0..grid.len() {
+            count += if enclosure_grid[line * 2 + 1][col * 2 + 1] == Enclosure::Unknown {
+                1
+            } else {
+                0
+            }
+        }
+    }
+    println!("Day 10, Task 2: {}", count);
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Enclosure {
+    Unknown,
+    Wall,
+    Outside,
+}
+
+impl From<Field> for Enclosure {
+    fn from(value: Field) -> Self {
+        match value {
+            Field::NE => Enclosure::Wall,
+            Field::NS => Enclosure::Wall,
+            Field::NW => Enclosure::Wall,
+            Field::ES => Enclosure::Wall,
+            Field::EW => Enclosure::Wall,
+            Field::SW => Enclosure::Wall,
+            Field::Start => Enclosure::Wall,
+            Field::None => Enclosure::Unknown,
+        }
+    }
+}
+
+fn create_initial_enclosure_map(
+    grid: &[Vec<Field>],
+    start_pos: (usize, usize),
+) -> Vec<Vec<Enclosure>> {
+    let mut one_step = State {
+        line: start_pos.0 + 1,
+        col: start_pos.1,
+        direction: Direction::North,
+    };
+
+    let mut enclosure = Vec::with_capacity(grid.len() * 2 + 3);
+    for _ in 0..grid.len() * 2 + 3 {
+        enclosure.push(vec![Enclosure::Unknown; grid.len() * 2 + 3]);
+    }
+
+    enclosure[start_pos.0 * 2 + 1][start_pos.1 * 2 + 1] = Enclosure::Wall;
+    enclosure[start_pos.0 * 2 + 2][start_pos.1 * 2 + 1] = Enclosure::Wall;
+
+    loop {
+        enclosure[one_step.line * 2 + 1][one_step.col * 2 + 1] = Enclosure::Wall;
+
+        let now = one_step;
+        one_step = one_step.next(grid[one_step.line][one_step.col]);
+        enclosure[now.line + one_step.line + 1][now.col + one_step.col + 1] = Enclosure::Wall;
+
+        let field = grid[one_step.line][one_step.col];
+
+        if field == Field::Start {
+            return enclosure;
+        }
+    }
+}
+
+fn calculate_outside_fields(enclosure: &mut [Vec<Enclosure>]) {
+    let mut worklist = Vec::new();
+    worklist.push((0, 0));
+
+    // Is Square
+    let length = enclosure.len();
+
+    while let Some((line, col)) = worklist.pop() {
+        if enclosure[line][col] != Enclosure::Unknown {
+            continue;
+        }
+        enclosure[line][col] = Enclosure::Outside;
+        if line > 0 {
+            worklist.push((line - 1, col));
+        }
+        if line < length - 1 {
+            worklist.push((line + 1, col));
+        }
+        if col > 0 {
+            worklist.push((line, col - 1));
+        }
+        if col < length - 1 {
+            worklist.push((line, col + 1));
+        }
+    }
+}
