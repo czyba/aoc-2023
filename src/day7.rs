@@ -173,7 +173,7 @@ pub fn task1() {
         .map(|(index, bid)| (index as u32 + 1) * bid.bid)
         .sum();
 
-    println!("Day 7, Task 1: {:?}", value);
+    println!("Day  7, Task 1: {:?}", value);
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -339,7 +339,7 @@ pub fn task2() {
         .map(|(index, bid)| (index as u32 + 1) * bid.bid)
         .sum();
 
-    println!("Day 7, Task 2: {:?}", value);
+    println!("Day  7, Task 2: {:?}", value);
 }
 
 #[cfg(test)]

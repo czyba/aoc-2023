@@ -53,7 +53,7 @@ pub fn task1() {
     let races = parse();
     let possibilities: u32 = races.iter().map(Race::count_possible_wins).product();
 
-    println!("Day 6, Task 1: {:?}", possibilities);
+    println!("Day  6, Task 1: {:?}", possibilities);
 }
 
 pub fn task2() {
@@ -63,5 +63,5 @@ pub fn task2() {
     };
     let possibilities = race.count_possible_wins();
 
-    println!("Day 6, Task 2: {:?}", possibilities);
+    println!("Day  6, Task 2: {:?}", possibilities);
 }

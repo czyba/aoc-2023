@@ -93,7 +93,7 @@ pub fn task1() {
         }
     }
 
-    println!("Day  8, Task 1:{}", steps);
+    println!("Day  8, Task 1: {}", steps);
 }
 
 pub fn task2() {
@@ -111,7 +111,7 @@ pub fn task2() {
         .map(|start| foo(&graph, &directions, start))
         .collect_vec();
     println!(
-        "Day  8, Task 2:{:?}",
+        "Day  8, Task 2: {:?}",
         a.iter().product::<u64>() * directions.len() as u64
     );
 }

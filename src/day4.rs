@@ -92,7 +92,7 @@ pub fn task1() {
         .map(|c| c.calculate_value())
         .sum();
 
-    println!("{}", value);
+    println!("Day  4, Task 1: {}", value);
 }
 
 pub fn task2() {
@@ -110,5 +110,5 @@ pub fn task2() {
         }
     }
 
-    println!("{:?}", card_counts.iter().sum::<u64>());
+    println!("Day  4, Task 2: {:?}", card_counts.iter().sum::<u64>());
 }

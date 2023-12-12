@@ -114,7 +114,7 @@ pub fn task1() {
         .map(|num_match| num_match.value)
         .sum();
 
-    println!("{}", part_num);
+    println!("Day  3, Task 1: {}", part_num);
 }
 
 pub fn task2() {
@@ -136,5 +136,5 @@ pub fn task2() {
         .map(|numbers| numbers.product::<i64>())
         .sum();
 
-    println!("{}", sum);
+    println!("Day  3, Task 2: {}", sum);
 }

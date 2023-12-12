@@ -25,7 +25,7 @@ pub fn task1() {
         .map(|game| game.id)
         .fold(0, u32::wrapping_add);
 
-    println!("{}", sum);
+    println!("Day  2, Task 1: {}", sum);
 }
 
 pub fn task2() {
@@ -40,7 +40,7 @@ pub fn task2() {
         .map(|r| r.red * r.blue * r.green)
         .sum();
 
-    println!("{}", sum);
+    println!("Day  2, Task 1: {}", sum);
 }
 
 fn line_to_game(line: &str) -> Game {

@@ -168,7 +168,7 @@ pub fn task1() {
         .map(|seed| parsed_input.translate_seed_to_location(*seed))
         .min()
         .unwrap();
-    println!("Day 5, Task 1: {}", min_location);
+    println!("Day  5, Task 1: {}", min_location);
 }
 
 pub fn task2() {
@@ -192,7 +192,7 @@ pub fn task2() {
         .min()
         .unwrap();
 
-    println!("Day 5, Task 2: {}", min_location);
+    println!("Day  5, Task 2: {}", min_location);
 }
 
 #[cfg(test)]
