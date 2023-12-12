@@ -81,16 +81,8 @@ fn calculate_possibilites(hss: &[HotSpringStatus], combinations: &[usize]) -> i6
                     next[j] += last[j];
                     next[j + 1] += last[j];
                 }
-                (_, Damaged, Damaged) => next[j + 1] += last[j],
-                (_, Damaged, Unknown) => next[j + 1] += last[j],
-                (Damaged, Operational, Operational) => {
-                    if j + 2 == status_orders.len() {
-                        next[j] += last[j];
-                    } else {
-                        next[j + 1] += last[j];
-                    }
-                }
-                (Damaged, Operational, Unknown) => {
+                (_, Damaged, Damaged) | (_, Damaged, Unknown) => next[j + 1] += last[j],
+                (Damaged, Operational, Operational) | (Damaged, Operational, Unknown) => {
                     if j + 2 == status_orders.len() {
                         next[j] += last[j];
                     } else {
