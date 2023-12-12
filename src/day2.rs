@@ -40,7 +40,7 @@ pub fn task2() {
         .map(|r| r.red * r.blue * r.green)
         .sum();
 
-    println!("Day  2, Task 1: {}", sum);
+    println!("Day  2, Task 2: {}", sum);
 }
 
 fn line_to_game(line: &str) -> Game {
