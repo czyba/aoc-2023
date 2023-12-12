@@ -114,7 +114,7 @@ pub fn task2() {
     let galaxies = find_galaxies(&space);
     let sum_distance = calulate_distances_2(&galaxies, row_values, col_values);
 
-    println!("Day 11, Task 1: {}", sum_distance);
+    println!("Day 11, Task 2: {}", sum_distance);
 }
 
 fn calulate_distances_2(

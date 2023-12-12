@@ -2,8 +2,6 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-use itertools::Itertools;
-
 fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item = String>> {
     let file = File::open(&filename)?;
     let reader = io::BufReader::new(file);
@@ -49,83 +47,147 @@ fn parse_line(line: &str) -> (Vec<HotSpringStatus>, Vec<usize>) {
 }
 
 pub fn task1() {
+    // 7541
     let data = parse();
-    let count = brute_force(&data);
+    let count: i64 = data
+        .iter()
+        .map(|(hss, counts)| calculate_possibilites(hss, counts))
+        .sum();
+    // let count = brute_force(&data);
     println!("Day 12, Task 1: {}", count);
 }
 
-fn brute_force(data: &Vec<(Vec<HotSpringStatus>, Vec<usize>)>) -> usize {
-    let mut sum = 0;
+fn calculate_possibilites(hss: &[HotSpringStatus], combinations: &[usize]) -> i64 {
+    use HotSpringStatus::*;
 
-    for (hss, operationals) in data {
-        let mut copy = hss.clone();
-        let mut num_valid = 0;
-        let mut current_index = 0;
+    let mut status_orders = Vec::new();
+    for combination in combinations.iter() {
+        status_orders.push(HotSpringStatus::Operational);
+        status_orders.extend(vec![HotSpringStatus::Damaged; *combination]);
+    }
+    status_orders.push(HotSpringStatus::Operational);
 
-        let stack = copy
-            .iter_mut()
-            .enumerate()
-            .filter(|(_, e)| **e == HotSpringStatus::Unknown)
-            .map(|(index, _)| index)
-            .collect_vec();
+    let mut last: Vec<i64> = vec![1];
+    let mut next: Vec<i64> = vec![0; 2];
 
-        loop {
-            if current_index == stack.len() {
-                if validate(&copy, operationals) {
-                    num_valid += 1;
+    for (index, status) in hss.iter().enumerate() {
+        for j in 0..(index + 1).min(status_orders.len() - 1) {
+            let prev = status_orders[j];
+            let curr = status_orders[j + 1];
+
+            match (prev, curr, *status) {
+                (Operational, Damaged, Operational) => next[j] += last[j],
+                (Operational, Damaged, Unknown) => {
+                    next[j] += last[j];
+                    next[j + 1] += last[j];
                 }
-                current_index -= 1;
-            }
-            let status = &mut copy[stack[current_index]];
-            match status {
-                HotSpringStatus::Operational => {
-                    *status = HotSpringStatus::Damaged;
-                    current_index += 1;
-                }
-                HotSpringStatus::Damaged => {
-                    *status = HotSpringStatus::Unknown;
-                    if current_index == 0 {
-                        break;
+                (_, Damaged, Damaged) => next[j + 1] += last[j],
+                (_, Damaged, Unknown) => next[j + 1] += last[j],
+                (Damaged, Operational, Operational) => {
+                    if j + 2 == status_orders.len() {
+                        next[j] += last[j];
+                    } else {
+                        next[j + 1] += last[j];
                     }
-                    current_index -= 1;
                 }
-                HotSpringStatus::Unknown => {
-                    *status = HotSpringStatus::Operational;
-                    current_index += 1;
+                (Damaged, Operational, Unknown) => {
+                    if j + 2 == status_orders.len() {
+                        next[j] += last[j];
+                    } else {
+                        next[j + 1] += last[j];
+                    }
                 }
+                _ => (),
             }
         }
-        sum += num_valid;
+
+        last = next;
+        next = vec![0; (index + 3).min(status_orders.len())];
     }
-    sum
+    last[status_orders.len() - 2]
 }
 
-fn validate(hss: &[HotSpringStatus], combinations: &Vec<usize>) -> bool {
-    let mut iter = hss.iter();
-    for chain in combinations {
-        let mut cnt = *chain;
-        for t in iter.by_ref() {
-            if *t == HotSpringStatus::Operational && cnt == *chain {
-                continue;
-            }
-            if *t == HotSpringStatus::Operational && cnt > 0 {
-                return false;
-            }
-            if *t == HotSpringStatus::Operational && cnt == 0 {
-                break;
-            }
-            if *t == HotSpringStatus::Damaged && cnt == 0 {
-                return false;
-            }
-            if *t == HotSpringStatus::Damaged {
-                cnt -= 1;
-            }
-        }
+pub fn task2() {
+    let data = parse();
+    let count: i64 = data
+        .iter()
+        .map(|(hss, combinations)| {
+            let mut extended_hss = hss.clone();
+            (0..4).for_each(|_| {
+                extended_hss.push(HotSpringStatus::Unknown);
+                extended_hss.extend(hss.iter());
+            });
 
-        if cnt > 0 {
-            return false;
-        }
+            let mut extended_combinations = combinations.clone();
+            (0..4).for_each(|_| {
+                extended_combinations.extend(combinations);
+            });
+
+            (extended_hss, extended_combinations)
+        })
+        .map(|(hss, counts)| calculate_possibilites(&hss, &counts))
+        .sum();
+
+    println!("Day 12, Task 2: {}", count);
+}
+
+#[cfg(test)]
+mod test {
+    use std::vec;
+
+    use super::*;
+    use HotSpringStatus::*;
+
+    #[test]
+    fn test() {
+        assert_eq!(
+            3,
+            calculate_possibilites(&vec![Unknown, Unknown, Unknown, Unknown], &vec![1, 1])
+        );
+
+        assert_eq!(
+            4,
+            calculate_possibilites(
+                &vec![
+                    Operational,
+                    Unknown,
+                    Unknown,
+                    Operational,
+                    Operational,
+                    Unknown,
+                    Unknown,
+                    Operational,
+                    Operational,
+                    Operational,
+                    Unknown,
+                    Damaged,
+                    Damaged,
+                ],
+                &vec![1, 1, 3]
+            )
+        );
+
+        assert_eq!(
+            10,
+            calculate_possibilites(
+                &vec![
+                    Unknown, Damaged, Damaged, Damaged, Unknown, Unknown, Unknown, Unknown,
+                    Unknown, Unknown, Unknown, Unknown,
+                ],
+                &vec![3, 2, 1]
+            )
+        );
+
+        // ??#??#????## 2,7
+        assert_eq!(
+            2,
+            calculate_possibilites(
+                &vec![
+                    Unknown, Unknown, Damaged, Unknown, Unknown, Damaged, Unknown, Unknown,
+                    Unknown, Unknown, Damaged, Damaged
+                ],
+                &vec![2, 7]
+            )
+        );
     }
-
-    iter.all(|s| *s == HotSpringStatus::Operational)
 }
