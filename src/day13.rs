@@ -50,13 +50,13 @@ fn parse_line(line: &str) -> u64 {
     })
 }
 
-fn find_reflection_index(field: &Vec<u64>) -> usize {
+fn find_reflection_with_bit_flips(field: &Vec<u64>, bit_flips: u32) -> usize {
     for i in 1..field.len() {
-        let mut mirrors = true;
+        let mut diff_cnt = 0;
         for j in 0..i.min(field.len() - i) {
-            mirrors &= field[i + j] == field[i - 1 - j]
+            diff_cnt += (field[i + j] ^ field[i - 1 - j]).count_ones();
         }
-        if mirrors {
+        if diff_cnt == bit_flips {
             return i;
         }
     }
@@ -69,8 +69,8 @@ pub fn task1() {
         .iter()
         .map(|bf| {
             (
-                find_reflection_index(&bf.rows),
-                find_reflection_index(&bf.cols),
+                find_reflection_with_bit_flips(&bf.rows, 0),
+                find_reflection_with_bit_flips(&bf.cols, 0),
             )
         })
         .fold(0, |acc, (r, c)| acc + r * 100 + c);
@@ -78,10 +78,17 @@ pub fn task1() {
     println!("Day 13, Task 1: {}", num);
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+pub fn task2() {
+    let bit_fields = parse();
+    let num = bit_fields
+        .iter()
+        .map(|bf| {
+            (
+                find_reflection_with_bit_flips(&bf.rows, 1),
+                find_reflection_with_bit_flips(&bf.cols, 1),
+            )
+        })
+        .fold(0, |acc, (r, c)| acc + r * 100 + c);
 
-    #[test]
-    fn test_mirror_index() {}
+    println!("Day 13, Task 2: {}", num);
 }
