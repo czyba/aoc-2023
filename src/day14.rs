@@ -205,5 +205,5 @@ pub fn task2() {
     let platform = tilt_ccw_circles(platform, 1000000000);
     let result = evaluate(&platform);
 
-    println!("Day 14, Task 1: {:?}", result);
+    println!("Day 14, Task 2: {:?}", result);
 }
