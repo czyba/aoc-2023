@@ -251,5 +251,5 @@ pub fn task2() {
         result = result.max(calculate_energized_tiles(&input, start));
     }
 
-    println!("Day 16, Task 1: {}", result);
+    println!("Day 16, Task 2: {}", result);
 }
