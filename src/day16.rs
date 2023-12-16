@@ -188,14 +188,8 @@ impl DirectBeam for u8 {
     }
 }
 
-pub fn task1() {
-    let input = parse();
+fn calculate_energized_tiles(input: &[String], start: State) -> usize {
     let mut seen = HashSet::new();
-    let start = State {
-        row: 0,
-        col: 0,
-        dir: Direction::West,
-    };
     let mut worklist = vec![start.clone()];
     seen.insert(start);
     while let Some(s) = worklist.pop() {
@@ -208,7 +202,54 @@ pub fn task1() {
         );
     }
 
-    let result = seen.iter().map(|s| (s.row, s.col)).unique().count();
+    seen.iter().map(|s| (s.row, s.col)).unique().count()
+}
+
+pub fn task1() {
+    let input = parse();
+    let start = State {
+        row: 0,
+        col: 0,
+        dir: Direction::West,
+    };
+
+    let result = calculate_energized_tiles(&input, start);
+
+    println!("Day 16, Task 1: {}", result);
+}
+
+pub fn task2() {
+    let input = parse();
+
+    let mut result = 0;
+    for row in 0..(input.len()) {
+        let start = State {
+            row,
+            col: 0,
+            dir: Direction::West,
+        };
+        result = result.max(calculate_energized_tiles(&input, start));
+        let start = State {
+            row,
+            col: input[row].len() - 1,
+            dir: Direction::East,
+        };
+        result = result.max(calculate_energized_tiles(&input, start));
+    }
+    for col in 0..(input[0].len()) {
+        let start = State {
+            row: 0,
+            col,
+            dir: Direction::North,
+        };
+        result = result.max(calculate_energized_tiles(&input, start));
+        let start = State {
+            row: input.len() - 1,
+            col,
+            dir: Direction::South,
+        };
+        result = result.max(calculate_energized_tiles(&input, start));
+    }
 
     println!("Day 16, Task 1: {}", result);
 }
