@@ -340,6 +340,7 @@ pub fn task1() {
 
 pub fn task2() {
     let input = parse();
+    // TODO: There's actually a bug here. We do not check that we end on the final tiles with a num_straight of at least 4.
     let r = calulate_shortest_distance(&input, get_successors_task2, 10);
     println!("Day 17, Task 2: {}", r);
 }
