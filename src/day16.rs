@@ -49,11 +49,11 @@ impl DirectBeam for u8 {
                 }],
                 Direction::East => vec![State {
                     row: state.row,
-                    col: state.col - 1,
+                    col: state.col.wrapping_sub(1),
                     dir: state.dir,
                 }],
                 Direction::South => vec![State {
-                    row: state.row - 1,
+                    row: state.row.wrapping_sub(1),
                     col: state.col,
                     dir: state.dir,
                 }],
@@ -67,7 +67,7 @@ impl DirectBeam for u8 {
             47 => match state.dir {
                 Direction::North => vec![State {
                     row: state.row,
-                    col: state.col - 1,
+                    col: state.col.wrapping_sub(1),
                     dir: Direction::East,
                 }],
                 Direction::East => vec![State {
@@ -81,7 +81,7 @@ impl DirectBeam for u8 {
                     dir: Direction::West,
                 }],
                 Direction::West => vec![State {
-                    row: state.row - 1,
+                    row: state.row.wrapping_sub(1),
                     col: state.col,
                     dir: Direction::South,
                 }],
@@ -94,13 +94,13 @@ impl DirectBeam for u8 {
                     dir: Direction::West,
                 }],
                 Direction::East => vec![State {
-                    row: state.row - 1,
+                    row: state.row.wrapping_sub(1),
                     col: state.col,
                     dir: Direction::South,
                 }],
                 Direction::South => vec![State {
                     row: state.row,
-                    col: state.col - 1,
+                    col: state.col.wrapping_sub(1),
                     dir: Direction::East,
                 }],
                 Direction::West => vec![State {
@@ -119,13 +119,13 @@ impl DirectBeam for u8 {
                     },
                     State {
                         row: state.row,
-                        col: state.col - 1,
+                        col: state.col.wrapping_sub(1),
                         dir: Direction::East,
                     },
                 ],
                 Direction::East => vec![State {
                     row: state.row,
-                    col: state.col - 1,
+                    col: state.col.wrapping_sub(1),
                     dir: state.dir,
                 }],
                 Direction::South => vec![
@@ -136,7 +136,7 @@ impl DirectBeam for u8 {
                     },
                     State {
                         row: state.row,
-                        col: state.col - 1,
+                        col: state.col.wrapping_sub(1),
                         dir: Direction::East,
                     },
                 ],
@@ -160,13 +160,13 @@ impl DirectBeam for u8 {
                         dir: Direction::North,
                     },
                     State {
-                        row: state.row - 1,
+                        row: state.row.wrapping_sub(1),
                         col: state.col,
                         dir: Direction::South,
                     },
                 ],
                 Direction::South => vec![State {
-                    row: state.row - 1,
+                    row: state.row.wrapping_sub(1),
                     col: state.col,
                     dir: state.dir,
                 }],
@@ -177,7 +177,7 @@ impl DirectBeam for u8 {
                         dir: Direction::North,
                     },
                     State {
-                        row: state.row - 1,
+                        row: state.row.wrapping_sub(1),
                         col: state.col,
                         dir: Direction::South,
                     },
