@@ -1,4 +1,4 @@
-use std::collections::{ BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -41,17 +41,6 @@ enum Direction {
     West,
 }
 
-impl Direction {
-    fn next(self, pos: (i32, i32)) -> (i32, i32) {
-        match self {
-            Direction::North => (pos.0 - 1, pos.1),
-            Direction::East => (pos.0, pos.1 + 1),
-            Direction::South => (pos.0 + 1, pos.1),
-            Direction::West => (pos.0, pos.1 - 1),
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 struct DigCommand {
     len: u32,
@@ -66,122 +55,39 @@ struct Range {
     col_2: i64,
 }
 
-fn calculate_surroundings(commands: &Vec<DigCommand>) -> (BTreeSet<(i32, i32)>, BTreeSet<Range>) {
-    let mut pos = (0, 0);
-    let mut set = BTreeSet::new();
-    let mut rangeSet = BTreeSet::new();
-    set.insert(pos);
+fn calculate_surroundings(commands: &Vec<DigCommand>) -> BTreeSet<Range> {
+    let mut pos = (0i64, 0i64);
+    let mut range_set = BTreeSet::new();
     for command in commands {
-        let copy = pos.clone();
-        for _ in 0..command.len {
-            pos = command.dir.next(pos);
-            set.insert(pos);
-        }
-        match command.dir {
+        pos = match command.dir {
+            Direction::North => (pos.0 - command.len as i64, pos.1),
             Direction::East => {
-                rangeSet.insert(Range {
-                    row: copy.0 as i64,
-                    col_1: copy.1 as i64,
-                    col_2: copy.1 as i64 + command.len as i64,
+                range_set.insert(Range {
+                    row: pos.0,
+                    col_1: pos.1,
+                    col_2: pos.1 + command.len as i64,
                 });
-            },
+                (pos.0, pos.1 + command.len as i64)
+            }
+            Direction::South => (pos.0 + command.len as i64, pos.1),
             Direction::West => {
-                rangeSet.insert(Range {
-                    row: copy.0 as i64,
-                    col_1: copy.1 as i64 - command.len as i64,
-                    col_2: copy.1 as i64,
+                range_set.insert(Range {
+                    row: pos.0,
+                    col_1: pos.1 - command.len as i64,
+                    col_2: pos.1,
                 });
-            },
-            _ => ()
+                (pos.0, pos.1 - command.len as i64)
+            }
         }
     }
-    (set, rangeSet)
+    range_set
 }
 
 pub fn task1() {
     let commands = parse();
-    let (outline, ranges) = calculate_surroundings(&commands);
-    let mut s = map(&outline);
-    dfs(&mut s);
-    let r = s
-        .iter()
-        .flat_map(|v| v.iter())
-        .filter(|&&c| c != 'X')
-        .count();
-
-    println!("Day 18, Task 1: {}", r);
-
+    let ranges = calculate_surroundings(&commands);
     let r2 = imscared(ranges);
     println!("Day 18, Task 1: {}", r2);
-}
-
-fn dfs(s: &mut Vec<Vec<char>>) {
-    let mut worklist: Vec<(usize, usize)> = Vec::new();
-    worklist.push((0, 0));
-    let row_len = s.len();
-    let col_len = s[0].len();
-
-    while let Some((row, col)) = worklist.pop() {
-        if s[row][col] != '.' {
-            continue;
-        }
-        s[row][col] = 'X';
-        if row + 1 < row_len {
-            worklist.push((row + 1, col));
-        }
-        if col + 1 < col_len {
-            worklist.push((row, col + 1));
-        }
-        if row > 0 {
-            worklist.push((row - 1, col));
-        }
-        if col > 0 {
-            worklist.push((row, col - 1));
-        }
-    }
-}
-
-fn map(data: &BTreeSet<(i32, i32)>) -> Vec<Vec<char>> {
-    let bounds = data
-        .iter()
-        .fold(((i32::MAX, i32::MIN), (i32::MAX, i32::MIN)), |acc, e| {
-            (
-                (acc.0 .0.min(e.0), acc.0 .1.max(e.0)),
-                (acc.1 .0.min(e.1), acc.1 .1.max(e.1)),
-            )
-        });
-
-    let rows = (bounds.0 .1 - bounds.0 .0 + 1) as usize;
-    let cols = (bounds.1 .1 - bounds.1 .0 + 1) as usize;
-    let mut v = Vec::new();
-    let t = vec!['.'; cols + 2];
-    v.push(t);
-
-    for i in 0..(rows as i32) {
-        let mut t = Vec::with_capacity(cols + 2);
-        t.push('.');
-        for j in 0..(cols as i32) {
-            if data.contains(&(i + bounds.0 .0, j + bounds.1 .0)) {
-                t.push('#');
-            } else {
-                t.push('.');
-            }
-        }
-        t.push('.');
-        v.push(t);
-    }
-
-    let t = vec!['.'; cols + 2];
-    v.push(t);
-
-    // Print map
-    // v.iter()
-    //     .for_each(|v2| {
-    //         let s = v2.iter().fold(String::new(),| mut acc, c| { acc.push(*c); acc});
-    //         println!("{}", s);
-    //     });
-
-    v
 }
 
 trait Helpers {
@@ -190,7 +96,6 @@ trait Helpers {
 }
 
 impl Helpers for (i64, i64) {
-
     fn len(&self) -> i64 {
         self.1 - self.0 + 1
     }
@@ -200,14 +105,14 @@ impl Helpers for (i64, i64) {
     }
 }
 
-impl Into<(i64, i64)> for &Range {
-    fn into(self) -> (i64, i64) {
-        (self.col_1, self.col_2)
+impl From<&Range> for (i64, i64) {
+    fn from(value: &Range) -> Self {
+        (value.col_1, value.col_2)
     }
 }
 
 fn imscared(range_set: BTreeSet<Range>) -> i64 {
-    let a : BTreeMap<i64, Vec<Range>> = range_set
+    let a: BTreeMap<i64, Vec<Range>> = range_set
         .into_iter()
         .into_group_map_by(|r| r.row)
         .into_iter()
@@ -218,7 +123,7 @@ fn imscared(range_set: BTreeSet<Range>) -> i64 {
     let first = start.next().unwrap();
     let mut last_index = *first.0;
     let mut count = 0;
-    let row_offset = last_index;
+    // let row_offset = last_index;
 
     for range in first.1 {
         let r = (range.col_1, range.col_2);
@@ -232,15 +137,15 @@ fn imscared(range_set: BTreeSet<Range>) -> i64 {
         count += row_count * (index - last_index - 1);
         last_index = *index;
 
-        println!("count: {}", count);
-        println!("actual_row: {}", index - row_offset);
-        println!("last: {:?}", last_ranges);
-        println!("new: {:?}", ranges);
+        // println!("count: {}", count);
+        // println!("actual_row: {}", index - row_offset);
+        // println!("last: {:?}", last_ranges);
+        // println!("new: {:?}", ranges);
 
-        let mut iter_new = ranges.iter().map(|e| <&Range as Into<(i64, i64)>>::into(e));
+        let mut iter_new = ranges.iter().map(<&Range as Into<(i64, i64)>>::into);
         let mut iter_old = last_ranges.iter();
         let mut old = *iter_old.next().unwrap();
-        let mut new : (i64, i64) = iter_new.next().unwrap().into();
+        let mut new: (i64, i64) = iter_new.next().unwrap();
         let mut next_ranges = BTreeSet::new();
         let mut this_row_count = 0;
         row_count = 0;
@@ -427,13 +332,12 @@ fn imscared(range_set: BTreeSet<Range>) -> i64 {
             panic!("old: {:?}, new: {:?}", old, new);
         }
 
-        println!("{}, {}", this_row_count, row_count);
+        // println!("{}, {}", this_row_count, row_count);
         count += this_row_count;
         last_ranges = next_ranges;
     }
     count
 }
-
 
 pub fn task2() {
     let mut commands = parse();
@@ -451,7 +355,7 @@ pub fn task2() {
         command.dir = dir;
     }
 
-    let (_, ranges) = calculate_surroundings(&commands);
+    let ranges = calculate_surroundings(&commands);
 
     let r2 = imscared(ranges);
     println!("Day 18, Task 2: {}", r2);
