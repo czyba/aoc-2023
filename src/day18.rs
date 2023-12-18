@@ -78,23 +78,74 @@ fn calculate_surroundings(commands: &Vec<DigCommand>) -> BTreeSet<(i32, i32)> {
 pub fn task1() {
     let commands = parse();
     let outline = calculate_surroundings(&commands);
-    let a = outline
-        .iter()
-        .into_group_map_by(|(x,_)| x);
-
-        // TODO Incorrect, since it does not cover "spikes"
-    let r : i32 = a.values()
-        .map(|v| {
-            let (min, max) = v.iter()
-                .map(|(x,y)| y)
-                .fold((i32::MAX, i32::MIN), |acc, n| {
-                    (acc.0.min(*n), acc.1.max(*n))
-                });
-            return max - min + 1;
-        })
-        .sum();
+    let mut s = map(&outline);
+    dfs(&mut s);
+    let r = s.iter()
+        .flat_map(|v|
+            v.iter()
+        )
+        .filter(|&&c| c != 'X')
+        .count();
 
     println!("Day 18, Task 1: {}", r);
+    
 }
 
+fn dfs(s: &mut Vec<Vec<char>>) {
+    let mut worklist : Vec<(usize, usize)> = Vec::new();
+    worklist.push((0,0));
+    let row_len = s.len();
+    let col_len = s[0].len();
 
+    while let Some((row, col)) = worklist.pop() {
+        if s[row][col] != '.' {
+            continue;
+        }
+        s[row][col] = 'X';
+        if row + 1 < row_len {
+            worklist.push((row + 1, col));
+        }
+        if col + 1 < col_len {
+            worklist.push((row, col + 1));
+        }
+        if row > 0 {
+            worklist.push((row - 1, col));
+        }
+        if col > 0 {
+            worklist.push((row, col - 1));
+        }
+    }
+}
+
+fn map(data: &BTreeSet<(i32, i32)>) -> Vec<Vec<char>> {
+    let bounds = data.iter()
+        .fold(((i32::MAX, i32::MIN), (i32::MAX, i32::MIN)), |acc, e| {
+            ((acc.0.0.min(e.0), acc.0.1.max(e.0)), (acc.1.0.min(e.1),  acc.1.1.max(e.1)))
+        });
+    
+    let rows = (bounds.0.1 - bounds.0.0 + 1) as usize;
+    let cols = (bounds.1.1 - bounds.1.0 + 1) as usize;
+    let mut v = Vec::new();
+    let mut s = String::with_capacity((rows + 2) * (cols + 5));
+    let t = vec!['.'; cols  + 2];
+    v.push(t);
+
+    for i in 0..(rows as i32) {
+        let mut t = Vec::with_capacity(cols + 2);
+        t.push('.');
+        for j in 0..(cols as i32) {
+            if data.contains(&(i + bounds.0.0, j + bounds.1.0)) {
+                t.push('#');
+            } else {
+                t.push('.');
+            }
+        }
+        t.push('.');
+        v.push(t);
+    }
+
+    let t = vec!['.'; cols  + 2];
+    v.push(t);
+
+    v
+}
