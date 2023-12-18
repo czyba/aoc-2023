@@ -3,8 +3,6 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-use itertools::Itertools;
-
 fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item = String>> {
     let file = File::open(&filename)?;
     let reader = io::BufReader::new(file);
@@ -25,14 +23,12 @@ fn parse_line(line: &str) -> DigCommand {
         "R" => Direction::East,
         "D" => Direction::South,
         "L" => Direction::West,
-        x => panic!("{:?}" , x),
+        x => panic!("{:?}", x),
     };
     let len = iter.next().unwrap().parse::<u32>().unwrap();
     let t = iter.next().unwrap();
     let hex_code = t[1..t.len() - 1].to_owned();
-    DigCommand {
-        len, dir, hex_code
-    }
+    DigCommand { len, dir, hex_code }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -44,7 +40,6 @@ enum Direction {
 }
 
 impl Direction {
-
     fn next(self, pos: (i32, i32)) -> (i32, i32) {
         match self {
             Direction::North => (pos.0 - 1, pos.1),
@@ -53,9 +48,9 @@ impl Direction {
             Direction::West => (pos.0, pos.1 - 1),
         }
     }
-
 }
 
+#[derive(Debug)]
 struct DigCommand {
     len: u32,
     dir: Direction,
@@ -63,9 +58,9 @@ struct DigCommand {
 }
 
 fn calculate_surroundings(commands: &Vec<DigCommand>) -> BTreeSet<(i32, i32)> {
-    let mut pos = (0,0);
+    let mut pos = (0, 0);
     let mut set = BTreeSet::new();
-    set.insert(pos.clone());
+    set.insert(pos);
     for command in commands {
         for _ in 0..command.len {
             pos = command.dir.next(pos);
@@ -80,20 +75,18 @@ pub fn task1() {
     let outline = calculate_surroundings(&commands);
     let mut s = map(&outline);
     dfs(&mut s);
-    let r = s.iter()
-        .flat_map(|v|
-            v.iter()
-        )
+    let r = s
+        .iter()
+        .flat_map(|v| v.iter())
         .filter(|&&c| c != 'X')
         .count();
 
     println!("Day 18, Task 1: {}", r);
-    
 }
 
 fn dfs(s: &mut Vec<Vec<char>>) {
-    let mut worklist : Vec<(usize, usize)> = Vec::new();
-    worklist.push((0,0));
+    let mut worklist: Vec<(usize, usize)> = Vec::new();
+    worklist.push((0, 0));
     let row_len = s.len();
     let col_len = s[0].len();
 
@@ -118,23 +111,26 @@ fn dfs(s: &mut Vec<Vec<char>>) {
 }
 
 fn map(data: &BTreeSet<(i32, i32)>) -> Vec<Vec<char>> {
-    let bounds = data.iter()
+    let bounds = data
+        .iter()
         .fold(((i32::MAX, i32::MIN), (i32::MAX, i32::MIN)), |acc, e| {
-            ((acc.0.0.min(e.0), acc.0.1.max(e.0)), (acc.1.0.min(e.1),  acc.1.1.max(e.1)))
+            (
+                (acc.0 .0.min(e.0), acc.0 .1.max(e.0)),
+                (acc.1 .0.min(e.1), acc.1 .1.max(e.1)),
+            )
         });
-    
-    let rows = (bounds.0.1 - bounds.0.0 + 1) as usize;
-    let cols = (bounds.1.1 - bounds.1.0 + 1) as usize;
+
+    let rows = (bounds.0 .1 - bounds.0 .0 + 1) as usize;
+    let cols = (bounds.1 .1 - bounds.1 .0 + 1) as usize;
     let mut v = Vec::new();
-    let mut s = String::with_capacity((rows + 2) * (cols + 5));
-    let t = vec!['.'; cols  + 2];
+    let t = vec!['.'; cols + 2];
     v.push(t);
 
     for i in 0..(rows as i32) {
         let mut t = Vec::with_capacity(cols + 2);
         t.push('.');
         for j in 0..(cols as i32) {
-            if data.contains(&(i + bounds.0.0, j + bounds.1.0)) {
+            if data.contains(&(i + bounds.0 .0, j + bounds.1 .0)) {
                 t.push('#');
             } else {
                 t.push('.');
@@ -144,8 +140,29 @@ fn map(data: &BTreeSet<(i32, i32)>) -> Vec<Vec<char>> {
         v.push(t);
     }
 
-    let t = vec!['.'; cols  + 2];
+    let t = vec!['.'; cols + 2];
     v.push(t);
 
     v
+}
+
+pub fn task2() {
+    let mut commands = parse();
+    for command in commands.iter_mut() {
+        let distance =
+            usize::from_str_radix(&command.hex_code[1..command.hex_code.len() - 1], 16).unwrap();
+        let dir = match &command.hex_code[(command.hex_code.len() - 1)..command.hex_code.len()] {
+            "0" => Direction::East,
+            "1" => Direction::South,
+            "2" => Direction::West,
+            "3" => Direction::North,
+            _ => panic!(),
+        };
+        command.len = distance as u32;
+        command.dir = dir;
+    }
+
+    println!("{:?}", commands);
+
+    println!("Day 18, Task 2: {}", "XXX");
 }
