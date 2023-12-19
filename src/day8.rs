@@ -68,7 +68,7 @@ fn parse_node(node_str: &str) -> (String, Node) {
     )
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<i32> {
     let (graph, directions) = parse();
 
     let start: String = "AAA".to_owned();
@@ -93,10 +93,14 @@ pub fn task1() {
         }
     }
 
-    println!("Day  8, Task 1: {}", steps);
+    crate::AOCResult {
+        day: 8,
+        task: 1,
+        r: steps,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u64> {
     let (graph, directions) = parse();
 
     let current_nodes: Vec<&String> = graph
@@ -110,10 +114,12 @@ pub fn task2() {
         .iter()
         .map(|start| foo(&graph, &directions, start))
         .collect_vec();
-    println!(
-        "Day  8, Task 2: {:?}",
-        a.iter().product::<u64>() * directions.len() as u64
-    );
+
+    crate::AOCResult {
+        day: 8,
+        task: 2,
+        r: a.iter().product::<u64>() * directions.len() as u64,
+    }
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]

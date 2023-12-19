@@ -99,7 +99,7 @@ fn find_special_chars(input: &str) -> Vec<(char, Position)> {
     result
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<i64> {
     let schematic = read_file_to_string("src/day3.txt").unwrap();
     let numbers = parse_numbers(&schematic);
     let special_chars = find_special_chars(&schematic);
@@ -114,10 +114,14 @@ pub fn task1() {
         .map(|num_match| num_match.value)
         .sum();
 
-    println!("Day  3, Task 1: {}", part_num);
+    crate::AOCResult {
+        day: 3,
+        task: 1,
+        r: part_num,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i64> {
     let schematic = read_file_to_string("src/day3.txt").unwrap();
     let numbers = parse_numbers(&schematic);
     let special_chars = find_special_chars(&schematic);
@@ -136,5 +140,9 @@ pub fn task2() {
         .map(|numbers| numbers.product::<i64>())
         .sum();
 
-    println!("Day  3, Task 2: {}", sum);
+    crate::AOCResult {
+        day: 3,
+        task: 2,
+        r: sum,
+    }
 }

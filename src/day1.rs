@@ -77,7 +77,7 @@ fn replacer<'a, T>(input: &'a str, replacements: &'a [(&'a str, T)]) -> InOrderR
     }
 }
 
-fn calculate_value(replacements: &[(&str, i32)], task_id: i32) {
+fn calculate_value(replacements: &[(&str, i32)]) -> i32 {
     let c = lines_from_file("src/day1_task1.txt")
         .unwrap()
         .map(|line| {
@@ -87,14 +87,21 @@ fn calculate_value(replacements: &[(&str, i32)], task_id: i32) {
         })
         .map(|p| p.map(|(l, r)| l * 10 + r).unwrap_or(0))
         .fold(0, i32::wrapping_add);
-
-    println!("Day  1, Task {}: {}", task_id, c);
+    c
 }
 
-pub fn task1() {
-    calculate_value(&DIGITS, 1);
+pub fn task1() -> crate::AOCResult<i32> {
+    crate::AOCResult {
+        day: 1,
+        task: 1,
+        r: calculate_value(&DIGITS),
+    }
 }
 
-pub fn task2() {
-    calculate_value(&DIGITS_INCLUDING_WRITTEN_OUT_DIGITS, 2);
+pub fn task2() -> crate::AOCResult<i32> {
+    crate::AOCResult {
+        day: 1,
+        task: 2,
+        r: calculate_value(&DIGITS_INCLUDING_WRITTEN_OUT_DIGITS),
+    }
 }

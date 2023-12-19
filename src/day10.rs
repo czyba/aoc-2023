@@ -141,7 +141,7 @@ fn parse() -> Vec<Vec<Field>> {
         .collect()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<usize> {
     let grid = parse();
 
     let start_pos = grid
@@ -197,7 +197,11 @@ pub fn task1() {
     })
     .unwrap();
 
-    println!("Day 10, Task 1: {}", num_steps / 2);
+    crate::AOCResult {
+        day: 10,
+        task: 1,
+        r: num_steps / 2,
+    }
 }
 
 fn find_start_or_loop_or_empty(grid: &[Vec<Field>], start_state: State) -> Option<usize> {
@@ -225,7 +229,7 @@ fn find_start_or_loop_or_empty(grid: &[Vec<Field>], start_state: State) -> Optio
     }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i32> {
     let grid = parse();
 
     let start_pos = grid
@@ -255,7 +259,12 @@ pub fn task2() {
             }
         }
     }
-    println!("Day 10, Task 2: {}", count);
+
+    crate::AOCResult {
+        day: 10,
+        task: 2,
+        r: count,
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

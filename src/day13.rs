@@ -63,7 +63,7 @@ fn find_reflection_with_bit_flips(field: &Vec<u64>, bit_flips: u32) -> usize {
     0
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<usize> {
     let bit_fields = parse();
     let num = bit_fields
         .iter()
@@ -75,10 +75,14 @@ pub fn task1() {
         })
         .fold(0, |acc, (r, c)| acc + r * 100 + c);
 
-    println!("Day 13, Task 1: {}", num);
+    crate::AOCResult {
+        day: 13,
+        task: 1,
+        r: num,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<usize> {
     let bit_fields = parse();
     let num = bit_fields
         .iter()
@@ -90,5 +94,9 @@ pub fn task2() {
         })
         .fold(0, |acc, (r, c)| acc + r * 100 + c);
 
-    println!("Day 13, Task 2: {}", num);
+    crate::AOCResult {
+        day: 13,
+        task: 2,
+        r: num,
+    }
 }

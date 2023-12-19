@@ -83,11 +83,15 @@ fn calculate_surroundings(commands: &Vec<DigCommand>) -> BTreeSet<Range> {
     range_set
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<i64> {
     let commands = parse();
     let ranges = calculate_surroundings(&commands);
     let r2 = imscared(ranges);
-    println!("Day 18, Task 1: {}", r2);
+    crate::AOCResult {
+        day: 18,
+        task: 1,
+        r: r2,
+    }
 }
 
 trait Helpers {
@@ -339,7 +343,7 @@ fn imscared(range_set: BTreeSet<Range>) -> i64 {
     count
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i64> {
     let mut commands = parse();
     for command in commands.iter_mut() {
         let distance =
@@ -358,5 +362,9 @@ pub fn task2() {
     let ranges = calculate_surroundings(&commands);
 
     let r2 = imscared(ranges);
-    println!("Day 18, Task 2: {}", r2);
+    crate::AOCResult {
+        day: 18,
+        task: 2,
+        r: r2,
+    }
 }

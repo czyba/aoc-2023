@@ -160,7 +160,7 @@ fn parse_map(map_str: &str) -> RangeMap {
     rm
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u64> {
     let parsed_input = parse();
     let min_location = parsed_input
         .seeds
@@ -168,10 +168,14 @@ pub fn task1() {
         .map(|seed| parsed_input.translate_seed_to_location(*seed))
         .min()
         .unwrap();
-    println!("Day  5, Task 1: {}", min_location);
+    crate::AOCResult {
+        day: 5,
+        task: 1,
+        r: min_location,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u64> {
     let parsed_input = parse();
 
     let min_location = parsed_input
@@ -192,7 +196,11 @@ pub fn task2() {
         .min()
         .unwrap();
 
-    println!("Day  5, Task 2: {}", min_location);
+    crate::AOCResult {
+        day: 5,
+        task: 2,
+        r: min_location,
+    }
 }
 
 #[cfg(test)]

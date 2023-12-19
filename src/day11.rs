@@ -34,14 +34,18 @@ fn parse() -> Space {
         .collect()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<usize> {
     let mut space = parse();
     expand_rows(&mut space);
     expand_cols(&mut space);
     let galaxies = find_galaxies(&space);
     let sum_distance = calulate_distances(&galaxies);
 
-    println!("Day 11, Task 1: {}", sum_distance);
+    crate::AOCResult {
+        day: 11,
+        task: 1,
+        r: sum_distance,
+    }
 }
 
 fn calulate_distances(galaxies: &[(usize, usize)]) -> usize {
@@ -107,14 +111,18 @@ fn expand_cols(space: &mut Space) {
     }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u64> {
     let space = parse();
     let row_values = calculate_row_values(&space);
     let col_values = calculate_column_values(&space);
     let galaxies = find_galaxies(&space);
     let sum_distance = calulate_distances_2(&galaxies, row_values, col_values);
 
-    println!("Day 11, Task 2: {}", sum_distance);
+    crate::AOCResult {
+        day: 11,
+        task: 2,
+        r: sum_distance,
+    }
 }
 
 fn calulate_distances_2(

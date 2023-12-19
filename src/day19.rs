@@ -325,7 +325,7 @@ fn parse_part(line: &str) -> Part {
     Part { x, m, a, s }
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u64> {
     let (workflows, parts) = parse();
     let sum: u64 = parts
         .into_iter()
@@ -340,10 +340,14 @@ pub fn task1() {
         .map(|part| part.get_total_value())
         .sum();
 
-    println!("Day 19, Task 1: {}", sum);
+    crate::AOCResult {
+        day: 19,
+        task: 1,
+        r: sum,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i64> {
     let (workflows, _) = parse();
     let mut worklist = Vec::new();
     worklist.push((
@@ -368,5 +372,9 @@ pub fn task2() {
         }
     }
 
-    println!("Day 19, Task 2: {}", count);
+    crate::AOCResult {
+        day: 19,
+        task: 2,
+        r: count,
+    }
 }

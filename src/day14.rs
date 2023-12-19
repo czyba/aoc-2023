@@ -157,13 +157,17 @@ fn evaluate(platform: &Vec<Vec<Space>>) -> usize {
         .sum()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<usize> {
     let platform = parse();
     let mut tiltable = TiltNorth(platform);
     tilt(&mut tiltable);
     let result = evaluate(&tiltable.0);
 
-    println!("Day 14, Task 1: {:?}", result);
+    crate::AOCResult {
+        day: 14,
+        task: 1,
+        r: result,
+    }
 }
 
 fn tilt_ccw_circles(mut platform: Vec<Vec<Space>>, times: usize) -> Vec<Vec<Space>> {
@@ -200,10 +204,14 @@ fn tilt_ccw(platform: Vec<Vec<Space>>) -> Vec<Vec<Space>> {
     tiltable.0
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<usize> {
     let platform = parse();
     let platform = tilt_ccw_circles(platform, 1000000000);
     let result = evaluate(&platform);
 
-    println!("Day 14, Task 2: {:?}", result);
+    crate::AOCResult {
+        day: 14,
+        task: 2,
+        r: result,
+    }
 }

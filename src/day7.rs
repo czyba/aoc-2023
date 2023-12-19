@@ -164,7 +164,7 @@ fn parse_line(line: &str) -> Bid {
     }
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u32> {
     let mut bids = parse();
     bids.sort_by(|l, r| l.hand.cmp(&r.hand));
     let value: u32 = bids
@@ -173,7 +173,11 @@ pub fn task1() {
         .map(|(index, bid)| (index as u32 + 1) * bid.bid)
         .sum();
 
-    println!("Day  7, Task 1: {:?}", value);
+    crate::AOCResult {
+        day: 7,
+        task: 1,
+        r: value,
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -330,7 +334,7 @@ fn parse_line2(line: &str) -> BidWithJoker {
     }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u32> {
     let mut bids = parse2();
     bids.sort_by(|l, r| l.hand.cmp(&r.hand));
     let value: u32 = bids
@@ -339,7 +343,11 @@ pub fn task2() {
         .map(|(index, bid)| (index as u32 + 1) * bid.bid)
         .sum();
 
-    println!("Day  7, Task 2: {:?}", value);
+    crate::AOCResult {
+        day: 7,
+        task: 2,
+        r: value,
+    }
 }
 
 #[cfg(test)]

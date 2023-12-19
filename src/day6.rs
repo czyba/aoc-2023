@@ -49,19 +49,27 @@ fn parse_numbers(line: &str) -> Vec<u64> {
         .collect()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u32> {
     let races = parse();
     let possibilities: u32 = races.iter().map(Race::count_possible_wins).product();
 
-    println!("Day  6, Task 1: {:?}", possibilities);
+    crate::AOCResult {
+        day: 6,
+        task: 1,
+        r: possibilities,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u32> {
     let race = Race {
         time: 54817088,
         distance: 446129210351007,
     };
     let possibilities = race.count_possible_wins();
 
-    println!("Day  6, Task 2: {:?}", possibilities);
+    crate::AOCResult {
+        day: 6,
+        task: 2,
+        r: possibilities,
+    }
 }

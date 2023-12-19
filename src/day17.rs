@@ -332,17 +332,25 @@ fn get_right_successor(input: &Vec<String>, state: &State) -> Option<State> {
     }
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u32> {
     let input = parse();
     let r = calulate_shortest_distance(&input, get_successors_task1, 3);
-    println!("Day 17, Task 1: {}", r);
+    crate::AOCResult {
+        day: 17,
+        task: 1,
+        r,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u32> {
     let input = parse();
     // TODO: There's actually a bug here. We do not check that we end on the final tiles with a num_straight of at least 4.
     let r = calulate_shortest_distance(&input, get_successors_task2, 10);
-    println!("Day 17, Task 2: {}", r);
+    crate::AOCResult {
+        day: 17,
+        task: 2,
+        r,
+    }
 }
 
 fn get_successors_task2(input: &Vec<String>, state: &State) -> Vec<State> {

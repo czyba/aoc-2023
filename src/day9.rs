@@ -71,22 +71,30 @@ fn extrapolate_backwards(data: &Vec<i64>) -> i64 {
     data.first().unwrap() - interpolated_value
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<i64> {
     let sum: i64 = parse()
         .iter_mut()
         .map(|data| extrapolate_forwards(data))
         .sum();
 
-    println!("Day  9, Task 1: {}", sum);
+    crate::AOCResult {
+        day: 9,
+        task: 1,
+        r: sum,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i64> {
     let sum: i64 = parse()
         .iter_mut()
         .map(|data| extrapolate_backwards(data))
         .sum();
 
-    println!("Day  9, Task 2: {}", sum);
+    crate::AOCResult {
+        day: 9,
+        task: 2,
+        r: sum,
+    }
 }
 
 #[cfg(test)]

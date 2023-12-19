@@ -46,7 +46,7 @@ fn parse_line(line: &str) -> (Vec<HotSpringStatus>, Vec<usize>) {
     (hss, operationals)
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<i64> {
     // 7541
     let data = parse();
     let count: i64 = data
@@ -54,7 +54,11 @@ pub fn task1() {
         .map(|(hss, counts)| calculate_possibilites(hss, counts))
         .sum();
     // let count = brute_force(&data);
-    println!("Day 12, Task 1: {}", count);
+    crate::AOCResult {
+        day: 12,
+        task: 1,
+        r: count,
+    }
 }
 
 fn calculate_possibilites(hss: &[HotSpringStatus], combinations: &[usize]) -> i64 {
@@ -99,7 +103,7 @@ fn calculate_possibilites(hss: &[HotSpringStatus], combinations: &[usize]) -> i6
     last[status_orders.len() - 2]
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<i64> {
     let data = parse();
     let count: i64 = data
         .iter()
@@ -120,13 +124,15 @@ pub fn task2() {
         .map(|(hss, counts)| calculate_possibilites(&hss, &counts))
         .sum();
 
-    println!("Day 12, Task 2: {}", count);
+    crate::AOCResult {
+        day: 12,
+        task: 2,
+        r: count,
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use std::vec;
-
     use super::*;
     use HotSpringStatus::*;
 
@@ -134,13 +140,13 @@ mod test {
     fn test() {
         assert_eq!(
             3,
-            calculate_possibilites(&vec![Unknown, Unknown, Unknown, Unknown], &vec![1, 1])
+            calculate_possibilites(&[Unknown, Unknown, Unknown, Unknown], &[1, 1])
         );
 
         assert_eq!(
             4,
             calculate_possibilites(
-                &vec![
+                &[
                     Operational,
                     Unknown,
                     Unknown,
@@ -153,20 +159,20 @@ mod test {
                     Operational,
                     Unknown,
                     Damaged,
-                    Damaged,
+                    Damaged
                 ],
-                &vec![1, 1, 3]
+                &[1, 1, 3]
             )
         );
 
         assert_eq!(
             10,
             calculate_possibilites(
-                &vec![
+                &[
                     Unknown, Damaged, Damaged, Damaged, Unknown, Unknown, Unknown, Unknown,
-                    Unknown, Unknown, Unknown, Unknown,
+                    Unknown, Unknown, Unknown, Unknown
                 ],
-                &vec![3, 2, 1]
+                &[3, 2, 1]
             )
         );
 
@@ -174,11 +180,11 @@ mod test {
         assert_eq!(
             2,
             calculate_possibilites(
-                &vec![
+                &[
                     Unknown, Unknown, Damaged, Unknown, Unknown, Damaged, Unknown, Unknown,
                     Unknown, Unknown, Damaged, Damaged
                 ],
-                &vec![2, 7]
+                &[2, 7]
             )
         );
     }

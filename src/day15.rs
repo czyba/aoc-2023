@@ -42,7 +42,7 @@ fn parse() -> Vec<String> {
         .collect()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u64> {
     use std::hash::Hash;
     let s = parse();
     let r: u64 = s
@@ -55,7 +55,11 @@ pub fn task1() {
         })
         .sum();
 
-    println!("Day 15, Task 1: {}", r);
+    crate::AOCResult {
+        day: 15,
+        task: 1,
+        r,
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -109,7 +113,7 @@ impl HM {
     }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u64> {
     let mut hm = HM::new();
     let s = parse();
     s.iter().for_each(|s| {
@@ -126,5 +130,9 @@ pub fn task2() {
         }
     });
 
-    println!("Day 15, Task 2: {:?}", hm.calculate_focusing_power());
+    crate::AOCResult {
+        day: 15,
+        task: 2,
+        r: hm.calculate_focusing_power(),
+    }
 }

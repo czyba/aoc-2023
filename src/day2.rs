@@ -8,7 +8,7 @@ fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item 
     Ok(reader.lines().map(|l| l.expect("Could not parse line")))
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u32> {
     let configuration = Configuration {
         total_red: 12,
         total_green: 13,
@@ -25,10 +25,14 @@ pub fn task1() {
         .map(|game| game.id)
         .fold(0, u32::wrapping_add);
 
-    println!("Day  2, Task 1: {}", sum);
+    crate::AOCResult {
+        day: 2,
+        task: 1,
+        r: sum,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u32> {
     let games: Vec<Game> = lines_from_file("src/day2.txt")
         .unwrap()
         .map(|l| line_to_game(&l))
@@ -40,7 +44,11 @@ pub fn task2() {
         .map(|r| r.red * r.blue * r.green)
         .sum();
 
-    println!("Day  2, Task 2: {}", sum);
+    crate::AOCResult {
+        day: 2,
+        task: 2,
+        r: sum,
+    }
 }
 
 fn line_to_game(line: &str) -> Game {

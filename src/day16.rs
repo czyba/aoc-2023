@@ -205,7 +205,7 @@ fn calculate_energized_tiles(input: &[String], start: State) -> usize {
     seen.iter().map(|s| (s.row, s.col)).unique().count()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<usize> {
     let input = parse();
     let start = State {
         row: 0,
@@ -215,10 +215,14 @@ pub fn task1() {
 
     let result = calculate_energized_tiles(&input, start);
 
-    println!("Day 16, Task 1: {}", result);
+    crate::AOCResult {
+        day: 16,
+        task: 1,
+        r: result,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<usize> {
     let input = parse();
 
     let mut result = 0;
@@ -251,5 +255,9 @@ pub fn task2() {
         result = result.max(calculate_energized_tiles(&input, start));
     }
 
-    println!("Day 16, Task 2: {}", result);
+    crate::AOCResult {
+        day: 16,
+        task: 2,
+        r: result,
+    }
 }

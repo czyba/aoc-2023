@@ -85,17 +85,21 @@ fn parse_numbers(numbers: &str) -> Vec<u32> {
         .collect()
 }
 
-pub fn task1() {
+pub fn task1() -> crate::AOCResult<u32> {
     let value: u32 = lines_from_file("src/day4.txt")
         .unwrap()
         .map(|line| parse_card(&line))
         .map(|c| c.calculate_value())
         .sum();
 
-    println!("Day  4, Task 1: {}", value);
+    crate::AOCResult {
+        day: 4,
+        task: 1,
+        r: value,
+    }
 }
 
-pub fn task2() {
+pub fn task2() -> crate::AOCResult<u64> {
     let cards: Vec<Card> = lines_from_file("src/day4.txt")
         .unwrap()
         .map(|line| parse_card(&line))
@@ -110,5 +114,9 @@ pub fn task2() {
         }
     }
 
-    println!("Day  4, Task 2: {:?}", card_counts.iter().sum::<u64>());
+    crate::AOCResult {
+        day: 4,
+        task: 2,
+        r: card_counts.iter().sum::<u64>(),
+    }
 }

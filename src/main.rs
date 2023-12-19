@@ -18,43 +18,61 @@ mod day7;
 mod day8;
 mod day9;
 
+pub struct AOCResult<A> {
+    day: u32,
+    task: u32,
+    r: A,
+}
+
+fn measure_time<R: std::fmt::Display, F: FnOnce() -> AOCResult<R>>(f: F) {
+    let now = std::time::Instant::now();
+    let r = f();
+    println!(
+        "Day {:2}, Task {}: {:18} in {:12} us",
+        r.day,
+        r.task,
+        r.r,
+        now.elapsed().as_micros()
+    );
+}
+
 fn main() {
-    day1::task1();
-    day1::task2();
-    day2::task1();
-    day2::task2();
-    day3::task1();
-    day3::task2();
-    day4::task1();
-    day4::task2();
-    day5::task1();
-    day5::task2();
-    day6::task1();
-    day6::task2();
-    day7::task1();
-    day7::task2();
-    day8::task1();
-    day8::task2();
-    day9::task1();
-    day9::task2();
-    day10::task1();
-    day10::task2();
-    day11::task1();
-    day11::task2();
-    day12::task1();
-    day12::task2();
-    day13::task1();
-    day13::task2();
-    day14::task1();
-    day14::task2();
-    day15::task1();
-    day15::task2();
-    day16::task1();
-    day16::task2();
-    day17::task1();
-    day17::task2();
-    day18::task1();
-    day18::task2();
-    day19::task1();
-    day19::task2();
+    measure_time(day1::task1);
+    measure_time(day1::task2);
+    measure_time(day2::task1);
+    measure_time(day2::task2);
+    measure_time(day3::task1);
+    measure_time(day3::task2);
+    measure_time(day4::task1);
+    measure_time(day4::task2);
+    measure_time(day5::task1);
+    measure_time(day5::task2);
+    measure_time(day6::task1);
+    measure_time(day6::task2);
+    measure_time(day7::task1);
+    measure_time(day7::task2);
+    measure_time(day8::task1);
+    measure_time(day8::task2);
+    measure_time(day9::task1);
+    measure_time(day9::task2);
+    measure_time(day10::task1);
+    measure_time(day10::task2);
+    measure_time(day11::task1);
+    measure_time(day11::task2);
+    measure_time(day12::task1);
+    measure_time(day12::task2);
+    measure_time(day13::task1);
+    measure_time(day13::task2);
+    measure_time(day14::task1);
+    measure_time(day14::task2);
+    measure_time(day15::task1);
+    measure_time(day15::task2);
+    measure_time(day16::task1);
+    measure_time(day16::task2);
+    measure_time(day17::task1);
+    measure_time(day17::task2);
+    measure_time(day18::task1);
+    measure_time(day18::task2);
+    measure_time(day19::task1);
+    measure_time(day19::task2);
 }
