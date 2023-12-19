@@ -113,19 +113,19 @@ impl Condition {
             (false, std::cmp::Ordering::Greater) => (self.value, true),
             x => panic!("{:?}", x),
         };
-        let mut true_range = part_range.clone();
-        let mut false_range = part_range.clone();
-        let true_arr_range = self.var.get_range(&mut true_range);
-        true_arr_range.1 = lt_value as i64 - 1;
-        let false_arr_range = self.var.get_range(&mut false_range);
-        false_arr_range.0 = lt_value as i64;
+        let mut lt_range = part_range.clone();
+        let mut ge_range = part_range.clone();
+        let lt_arr_range = self.var.get_range(&mut lt_range);
+        lt_arr_range.1 = lt_value as i64 - 1;
+        let ge_arr_range = self.var.get_range(&mut ge_range);
+        ge_arr_range.0 = lt_value as i64;
         let res = match (
-            true_arr_range.1 >= true_arr_range.0,
-            false_arr_range.1 >= false_arr_range.0,
+            lt_arr_range.1 >= lt_arr_range.0,
+            ge_arr_range.1 >= ge_arr_range.0,
         ) {
-            (true, true) => (Some(true_range), Some(false_range)),
-            (true, false) => (Some(true_range), None),
-            (false, true) => (None, Some(false_range)),
+            (true, true) => (Some(lt_range), Some(ge_range)),
+            (true, false) => (Some(lt_range), None),
+            (false, true) => (None, Some(ge_range)),
             (false, false) => (None, None),
         };
         if true_lower {
