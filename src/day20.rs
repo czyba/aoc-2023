@@ -380,7 +380,7 @@ fn _push_button_rx_low(network: &mut Network) -> bool {
 fn _print_dot_graph(network: &Network) {
     let mut s = String::new();
     s.push_str("digraph {\n");
-    s.push_str("button -> broadcaster;");
+    s.push_str("button -> broadcaster;\n");
     for e in network {
         let module: &dyn ModulePlus = e.1.as_ref();
         _append_dot_node(module.as_module(), &mut s);
