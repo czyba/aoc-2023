@@ -43,6 +43,10 @@ trait Module {
     fn evaluate_pulse(&mut self, pulse: &Pulse) -> Option<Vec<Pulse>>;
     fn get_name(&self) -> &str;
     fn get_targets(&self) -> Option<&Vec<String>>;
+    fn reset(&mut self) {}
+    fn broke(&mut self) -> Option<&mut BTreeMap<String, PulseType>> {
+        None
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -94,6 +98,10 @@ impl Module for FlipFlopModule {
 
     fn get_targets(&self) -> Option<&Vec<String>> {
         Some(&self.targets)
+    }
+
+    fn reset(&mut self) {
+        self.last_pulse = PulseType::Low;
     }
 }
 
@@ -152,7 +160,9 @@ impl ConjunctionModule {
 
 impl Module for ConjunctionModule {
     fn evaluate_pulse(&mut self, pulse: &Pulse) -> Option<Vec<Pulse>> {
-        *self.last_inputs.get_mut(&pulse.source).unwrap() = pulse.pulse_type;
+        if let Some(a) = self.last_inputs.get_mut(&pulse.source) {
+            *a = pulse.pulse_type;
+        }
         let pulse = if self.last_inputs.values().all(|&v| v == PulseType::High) {
             PulseType::Low
         } else {
@@ -167,6 +177,16 @@ impl Module for ConjunctionModule {
 
     fn get_targets(&self) -> Option<&Vec<String>> {
         Some(&self.targets)
+    }
+
+    fn reset(&mut self) {
+        for (_, v) in self.last_inputs.iter_mut() {
+            *v = PulseType::Low;
+        }
+    }
+
+    fn broke(&mut self) -> Option<&mut BTreeMap<String, PulseType>> {
+        Some(&mut self.last_inputs)
     }
 }
 
@@ -249,8 +269,9 @@ trait ModulePlus: Module + Debug {
 }
 
 type Network = HashMap<String, Box<dyn ModulePlus>>;
+type PredecessorMap = HashMap<String, Vec<String>>;
 
-fn parse() -> Network {
+fn parse() -> (Network, PredecessorMap) {
     let module_infos: Vec<ModuleInfo> = lines_from_file("src/day20.txt")
         .unwrap()
         .map(|line| parse_line(&line))
@@ -305,7 +326,7 @@ fn parse() -> Network {
         modules.entry(k.clone()).or_insert(Box::new(SinkModule {}));
     }
 
-    modules
+    (modules, inputs)
 }
 
 fn push_button(network: &mut Network) -> (u64, u64) {
@@ -333,7 +354,7 @@ fn push_button(network: &mut Network) -> (u64, u64) {
 }
 
 pub fn task1() -> crate::AOCResult<u64> {
-    let mut network = parse();
+    let (mut network, _) = parse();
 
     let mut sum = (0, 0);
     for _ in 0..1000 {
@@ -349,7 +370,7 @@ pub fn task1() -> crate::AOCResult<u64> {
     }
 }
 
-fn _push_button_rx_low(network: &mut Network) -> bool {
+fn push_button_was_node_low(network: &mut Network, last_node: &str) -> bool {
     let mut pulses = VecDeque::new();
     pulses.push_back(Pulse {
         source: "button".to_owned(),
@@ -361,7 +382,7 @@ fn _push_button_rx_low(network: &mut Network) -> bool {
 
     let mut res = false;
     while let Some(pulse) = pulses.pop_front() {
-        if pulse.target == "rx" && pulse.pulse_type == PulseType::Low {
+        if pulse.target == last_node && pulse.pulse_type == PulseType::Low {
             res = true;
         }
         let module = network.get_mut(&pulse.target).unwrap();
@@ -391,31 +412,71 @@ fn _print_dot_graph(network: &Network) {
     println!("{}", s);
 }
 
+fn iterator_broadcast_single(network: &mut Network, last_id: String, pre_last_id: String) -> u64 {
+    let mut num_cnt: u64 = 1;
+    let reset_values = network
+        .get_mut(&pre_last_id)
+        .unwrap()
+        .broke()
+        .unwrap()
+        .clone();
+
+    for keys in reset_values.keys() {
+        network
+            .get_mut(&pre_last_id)
+            .unwrap()
+            .broke()
+            .unwrap()
+            .clear();
+        network
+            .get_mut(&pre_last_id)
+            .unwrap()
+            .broke()
+            .unwrap()
+            .insert(keys.clone(), PulseType::Low);
+
+        let mut cnt = 0;
+        loop {
+            cnt += 1;
+            if push_button_was_node_low(network, &last_id) {
+                break;
+            }
+        }
+
+        network.iter_mut().for_each(|(_, v)| v.reset());
+
+        num_cnt *= cnt;
+    }
+
+    *network.get_mut(&pre_last_id).unwrap().broke().unwrap() = reset_values;
+
+    num_cnt
+}
+
+fn find_last_and_pre_last_node_ids(
+    network: &Network,
+    predecessors: &PredecessorMap,
+) -> (String, String) {
+    let last_id = predecessors
+        .keys()
+        .find(|id| network.get(*id).unwrap().get_targets().is_none())
+        .unwrap();
+    let pre_last_id = &predecessors.get(last_id).unwrap()[0];
+    (last_id.clone(), pre_last_id.clone())
+}
+
 pub fn task2() -> crate::AOCResult<u64> {
-    let _network = parse();
+    let (mut network, predecessors) = parse();
 
     // _print_dot_graph(&_network);
 
-    // let mut cnt = 0;
-    // loop {
-    //     cnt += 1;
-    //     if push_button_rx_low(&mut network) {
-    //         println!("{}", cnt);
-    //     }
-    // }
+    let nodes_to_adjust = find_last_and_pre_last_node_ids(&network, &predecessors);
+    let result = iterator_broadcast_single(&mut network, nodes_to_adjust.0, nodes_to_adjust.1);
+    println!("{}", result);
 
-    // Dot Graph shows that the actual part consists of 4 separate loops.
-    // Each loop repeats after the same number of steps.
-    // Each loop size do not have a gcd > 1 with each other.
-    //
-    // Loops + Sizes
-    // xc -> 3823
-    // ks -> 3907
-    // kp -> 3733
-    // ct -> 3797
     crate::AOCResult {
         day: 20,
         task: 2,
-        r: 3823 * 3907 * 3733 * 3797,
+        r: result,
     }
 }
