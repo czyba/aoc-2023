@@ -31,7 +31,7 @@ struct Pulse {
     target: String,
 }
 
-fn _append_dot_node(module: &dyn ModulePlus, s: &mut String) {
+fn _append_dot_node(module: &dyn Module, s: &mut String) {
     if let Some(targets) = module.get_targets() {
         for target in targets {
             s.push_str(&format!("{} -> {};\n", module.get_name(), target));
@@ -97,7 +97,11 @@ impl Module for FlipFlopModule {
     }
 }
 
-impl ModulePlus for FlipFlopModule {}
+impl ModulePlus for FlipFlopModule {
+    fn as_module(&self) -> &dyn Module {
+        self
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct BroadcastModule {
@@ -123,7 +127,11 @@ impl Module for BroadcastModule {
     }
 }
 
-impl ModulePlus for BroadcastModule {}
+impl ModulePlus for BroadcastModule {
+    fn as_module(&self) -> &dyn Module {
+        self
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct ConjunctionModule {
@@ -162,7 +170,11 @@ impl Module for ConjunctionModule {
     }
 }
 
-impl ModulePlus for ConjunctionModule {}
+impl ModulePlus for ConjunctionModule {
+    fn as_module(&self) -> &dyn Module {
+        self
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct SinkModule {}
@@ -181,7 +193,11 @@ impl Module for SinkModule {
     }
 }
 
-impl ModulePlus for SinkModule {}
+impl ModulePlus for SinkModule {
+    fn as_module(&self) -> &dyn Module {
+        self
+    }
+}
 
 enum ModuleType {
     Sink,
@@ -228,7 +244,9 @@ fn parse_line(line: &str) -> ModuleInfo {
     }
 }
 
-trait ModulePlus: Module + Debug {}
+trait ModulePlus: Module + Debug {
+    fn as_module(&self) -> &dyn Module;
+}
 
 type Network = HashMap<String, Box<dyn ModulePlus>>;
 
@@ -365,7 +383,7 @@ fn _print_dot_graph(network: &Network) {
     s.push_str("button -> broadcaster;");
     for e in network {
         let module: &dyn ModulePlus = e.1.as_ref();
-        _append_dot_node(module, &mut s);
+        _append_dot_node(module.as_module(), &mut s);
     }
 
     s.push('}');
@@ -376,7 +394,7 @@ fn _print_dot_graph(network: &Network) {
 pub fn task2() -> crate::AOCResult<u64> {
     let _network = parse();
 
-    // print_dot_graph(&network);
+    // _print_dot_graph(&_network);
 
     // let mut cnt = 0;
     // loop {
