@@ -472,7 +472,6 @@ pub fn task2() -> crate::AOCResult<u64> {
 
     let nodes_to_adjust = find_last_and_pre_last_node_ids(&network, &predecessors);
     let result = iterator_broadcast_single(&mut network, nodes_to_adjust.0, nodes_to_adjust.1);
-    println!("{}", result);
 
     crate::AOCResult {
         day: 20,
