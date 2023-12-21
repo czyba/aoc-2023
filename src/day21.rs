@@ -306,19 +306,24 @@ fn calculate_steps_large(input: &Vec<String>, num_steps: usize) -> usize {
     let mid = len / 2;
     let mut count = 0;
     
+    // TODO: Note that there are some errors when remaining top == input.len();
     let num_full_size = num_steps / len;
-    let remaining_top = num_steps - num_full_size * len + mid;
+    let remaining_top = num_steps - num_full_size * len + mid ;
     let remaining_top_corner = num_steps - num_full_size * len - 1;
     let number_full_tiles = numbers(num_full_size, num_steps);
 
     {
         let distances_from_bottom = transform_to_distance_map(shortest_paths(input, (len - 1, mid)));
         count += *distances_from_bottom.get(&remaining_top).unwrap();
+        if remaining_top >= len {
+            count += *distances_from_bottom.get(&(remaining_top - len)).unwrap();
+        }
         let (odd_cnt, even_cnt) = get_max_(&distances_from_bottom);
         count += number_full_tiles.straight_odds * odd_cnt + number_full_tiles.straight_evens * even_cnt;
+        
 
         let distances_from_bottom_right = transform_to_distance_map(shortest_paths(input, (len - 1, len -1)));
-        let size_top_corner = *distances_from_bottom_right.get(&remaining_top_corner).unwrap();
+        let size_top_corner = *distances_from_bottom_right.get(&remaining_top_corner).as_deref().unwrap_or(&0);
         let size_top_corner_large = *distances_from_bottom_right.get( &(remaining_top_corner + len)).unwrap();
         count += size_top_corner * num_full_size + size_top_corner_large * (num_full_size - 1);
         let (odd_cnt, even_cnt) = get_max_(&distances_from_bottom_right);
@@ -328,11 +333,14 @@ fn calculate_steps_large(input: &Vec<String>, num_steps: usize) -> usize {
     {
         let distance_from_left = transform_to_distance_map(shortest_paths(input, (mid, 0)));
         count += *distance_from_left.get(&remaining_top).unwrap();
+        if remaining_top >= len {
+            count += *distance_from_left.get(&(remaining_top - len)).unwrap();
+        }
         let (odd_cnt, even_cnt) = get_max_(&distance_from_left);
         count += number_full_tiles.straight_odds * odd_cnt + number_full_tiles.straight_evens * even_cnt;
 
         let distances_from_bottom_left = transform_to_distance_map(shortest_paths(input, (len - 1, 0)));
-        let size_top_corner = *distances_from_bottom_left.get(&remaining_top_corner).unwrap();
+        let size_top_corner = *distances_from_bottom_left.get(&remaining_top_corner).as_deref().unwrap_or(&0);
         let size_top_corner_large = *distances_from_bottom_left.get( &(remaining_top_corner + len)).unwrap();
         count += size_top_corner * num_full_size + size_top_corner_large * (num_full_size - 1);
         let (odd_cnt, even_cnt) = get_max_(&distances_from_bottom_left);
@@ -342,11 +350,14 @@ fn calculate_steps_large(input: &Vec<String>, num_steps: usize) -> usize {
     {
         let distance_from_top = transform_to_distance_map(shortest_paths(input, (0, mid)));
         count += *distance_from_top.get(&remaining_top).unwrap();
+        if remaining_top >= len {
+            count += *distance_from_top.get(&(remaining_top - len)).unwrap();
+        }
         let (odd_cnt, even_cnt) = get_max_(&distance_from_top);
         count += number_full_tiles.straight_odds * odd_cnt + number_full_tiles.straight_evens * even_cnt;
 
         let distance_from_top_left = transform_to_distance_map(shortest_paths(input, (0, 0)));
-        let size_top_corner = *distance_from_top_left.get(&remaining_top_corner).unwrap();
+        let size_top_corner = *distance_from_top_left.get(&remaining_top_corner).as_deref().unwrap_or(&0);
         let size_top_corner_large = *distance_from_top_left.get( &(remaining_top_corner + len)).unwrap();
         count += size_top_corner * num_full_size + size_top_corner_large * (num_full_size - 1);
         let (odd_cnt, even_cnt) = get_max_(&distance_from_top_left);
@@ -356,11 +367,14 @@ fn calculate_steps_large(input: &Vec<String>, num_steps: usize) -> usize {
     {
         let distance_from_right = transform_to_distance_map(shortest_paths(input, (mid, len - 1)));
         count += *distance_from_right.get(&remaining_top).unwrap();
+        if remaining_top >= len {
+            count += *distance_from_right.get(&(remaining_top - len)).unwrap();
+        }
         let (odd_cnt, even_cnt) = get_max_(&distance_from_right);
         count += number_full_tiles.straight_odds * odd_cnt + number_full_tiles.straight_evens * even_cnt;
 
         let distance_from_top_right = transform_to_distance_map(shortest_paths(input, (0, len - 1)));
-        let size_top_corner = *distance_from_top_right.get(&remaining_top_corner).unwrap();
+        let size_top_corner = *distance_from_top_right.get(&remaining_top_corner).as_deref().unwrap_or(&0);
         let size_top_corner_large = *distance_from_top_right.get( &(remaining_top_corner + len)).unwrap();
         count += size_top_corner * num_full_size + size_top_corner_large * (num_full_size - 1);
         let (odd_cnt, even_cnt) = get_max_(&distance_from_top_right);
@@ -430,8 +444,10 @@ fn calculate_steps_large(input: &Vec<String>, num_steps: usize) -> usize {
 
 
 pub fn task2() -> crate::AOCResult<usize> {
-    let mut input = parse("src/day21_2.txt");
     let steps = 22;
+    
+    
+    let mut input = parse("src/day21_2.txt");
     let starting_pos = get_starting_pos(&mut input);
     let shortes_paths = shortest_paths_bounded(&input, starting_pos, steps);
     let r_test = shortes_paths
