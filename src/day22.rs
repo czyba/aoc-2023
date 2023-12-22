@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap, HashSet, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -64,7 +64,7 @@ fn settle_bricks(snapshot: &Vec<Brick>) -> BTreeMap<usize, Vec<Brick>> {
         }
         for i in 0..(brick.end.2 - brick.start.2 + 1) {
             map.entry(index + i)
-                .or_insert_with(|| Vec::new())
+                .or_insert_with(Vec::new)
                 .push(brick.clone());
         }
     }
@@ -72,14 +72,12 @@ fn settle_bricks(snapshot: &Vec<Brick>) -> BTreeMap<usize, Vec<Brick>> {
 }
 
 struct HelperMaps {
-    layer_block_start_map: BTreeMap<usize, Vec<usize>>,
+    _layer_block_start_map: BTreeMap<usize, Vec<usize>>,
     layer_block_end_map: BTreeMap<usize, Vec<usize>>,
     supports_bricks_map: HashMap<usize, BTreeSet<usize>>,
 }
 
-fn calculate_supporting_layers(
-    stack: &BTreeMap<usize, Vec<Brick>>,
-) -> HelperMaps {
+fn calculate_supporting_layers(stack: &BTreeMap<usize, Vec<Brick>>) -> HelperMaps {
     let iter = stack.iter().rev();
     let mut supports_bricks_map = HashMap::new();
     let mut seen_bricks = HashSet::new();
@@ -111,14 +109,14 @@ fn calculate_supporting_layers(
                 .or_insert_with(Vec::new)
                 .push(brick_to_check.id);
             layer_block_start_map
-                .entry(*layer_num - (brick_to_check.end.2 + brick_to_check.start.2))
+                .entry(*layer_num - (brick_to_check.end.2 - brick_to_check.start.2))
                 .or_insert_with(Vec::new)
                 .push(brick_to_check.id);
             seen_bricks.insert(brick_to_check.id);
         }
     }
     HelperMaps {
-        layer_block_start_map,
+        _layer_block_start_map: layer_block_start_map,
         layer_block_end_map,
         supports_bricks_map,
     }
@@ -160,7 +158,10 @@ pub fn task1() -> crate::AOCResult<usize> {
     });
     let stack = settle_bricks(&bricks);
     let helper_maps = calculate_supporting_layers(&stack);
-    let r = calculate_disintigratable_bricks(&helper_maps.layer_block_end_map, &helper_maps.supports_bricks_map);
+    let r = calculate_disintigratable_bricks(
+        &helper_maps.layer_block_end_map,
+        &helper_maps.supports_bricks_map,
+    );
 
     crate::AOCResult {
         day: 22,
@@ -170,59 +171,91 @@ pub fn task1() -> crate::AOCResult<usize> {
 }
 
 fn calculate_disintigration_falling_map(
-    helper_maps: &HelperMaps,
-) {
+    stack: &BTreeMap<usize, Vec<Brick>>,
+) -> HashMap<usize, usize> {
     let mut disintigrate_falling_map = HashMap::new();
-    let mut upper_layer_supports : HashMap<BTreeSet<usize>, usize> = HashMap::new();
-    upper_layer_supports.insert(BTreeSet::new(), 0);
-    for (layer, blocks) in helper_maps.layer_block_end_map.iter().rev() {
-        
+    let iter = stack.iter().rev();
+    let mut last_layer_falls: HashMap<BTreeSet<usize>, usize> = HashMap::new();
+    last_layer_falls.insert(BTreeSet::new(), 0);
 
+    for (layer, bricks) in iter {
+        // println!("{:?}", last_layer_falls);
 
-        for block in blocks {
-            let supports = helper_maps.supports_bricks_map.get(block).unwrap();
-            if supports.is_empty() {
-                disintigrate_falling_map.insert(block, 0);
-            } else {
-                let mut other_supports : BTreeSet<usize> = BTreeSet::new();
-                for other in blocks.iter() {
-                    if block == other {
-                        continue;
-                    } 
-                    other_supports.extend(helper_maps.supports_bricks_map.get(other).unwrap());
-                }
-                let exclusive_supports : BTreeSet<usize> = supports.difference(&other_supports).cloned().collect();
-                let r = upper_layer_supports.get(&exclusive_supports).unwrap();
-                disintigrate_falling_map.insert(block, *r + exclusive_supports.len());
+        // A vertical brick may support itself.
+        let mut supports_bricks_map = HashMap::new();
+
+        for brick in bricks {
+            if supports_bricks_map.contains_key(&brick.id) {
+                continue;
             }
+            let mut supports_set = BTreeSet::new();
+
+            if let Some(layer_above) = stack.get(&(layer + 1)) {
+                for brick_above in layer_above {
+                    if brick_above.overlaps_x_y(brick) {
+                        supports_set.insert(brick_above.id);
+                    }
+                }
+            }
+            supports_bricks_map.insert(brick.id, supports_set);
         }
 
-        let mut current_layer_supports : HashMap<BTreeSet<usize>, usize> = HashMap::new();
+        let mut supports_itself = HashSet::new();
+        // Calculate toppling blocks, if necessary
+        for brick in bricks {
+            if disintigrate_falling_map.contains_key(&brick.id) {
+                supports_itself.insert(brick.id);
+                continue;
+            }
+            let mut other_supports: BTreeSet<usize> = BTreeSet::new();
+            for other in bricks {
+                if brick.id == other.id {
+                    continue;
+                }
+                other_supports.extend(supports_bricks_map.get(&other.id).unwrap());
+            }
+            let supports = supports_bricks_map.get(&brick.id).unwrap();
+            let exclusive_supports = supports.difference(&other_supports).cloned().collect();
+            let topples =
+                last_layer_falls.get(&exclusive_supports).unwrap() + exclusive_supports.len();
+            disintigrate_falling_map.insert(brick.id, topples);
+        }
 
-        // Assumption: no more than 64 blocks on a layer
-        for i in 0..(2usize.pow(blocks.len() as u32)) {
-            let mut set = BTreeSet::new();
-            let mut supports : BTreeSet<usize> = BTreeSet::new();
-            let mut other_supports : BTreeSet<usize> = BTreeSet::new();
-            for (index, block_id) in blocks.iter().enumerate() {
-                if i & (1 << index) != 0 {
-                    set.insert(*block_id);
-                    supports.extend(helper_maps.supports_bricks_map.get(block_id).unwrap());
+        // Add layer combinations
+        let mut current_layer_falls: HashMap<BTreeSet<usize>, usize> = HashMap::new();
+        for bit_mask in 0..(1usize << bricks.len()) {
+            let mut falling_blocks = BTreeSet::new();
+            let mut supports: BTreeSet<usize> = BTreeSet::new();
+            let mut other_supports: BTreeSet<usize> = BTreeSet::new();
+
+            for (bit_index, brick) in bricks.iter().enumerate() {
+                if bit_mask & 1 << bit_index != 0 {
+                    falling_blocks.insert(brick.id);
+                    supports.extend(supports_bricks_map.get(&brick.id).unwrap());
                 } else {
-                    other_supports.extend(helper_maps.supports_bricks_map.get(block_id).unwrap());
+                    other_supports.extend(supports_bricks_map.get(&brick.id).unwrap());
                 }
             }
 
-            let exclusive_supports : BTreeSet<usize> = supports.difference(&other_supports).cloned().collect();
+            let exclusive_supports = supports.difference(&other_supports).cloned().collect();
 
-            let r = upper_layer_supports.get(&exclusive_supports).unwrap() + exclusive_supports.len();
-            current_layer_supports.insert(set, r);
+            let topples = last_layer_falls.get(&exclusive_supports).unwrap()
+                + exclusive_supports
+                    .iter()
+                    .map(|block| {
+                        if supports_itself.contains(block) {
+                            0
+                        } else {
+                            1
+                        }
+                    })
+                    .sum::<usize>();
+            current_layer_falls.insert(falling_blocks, topples);
         }
 
-        upper_layer_supports = current_layer_supports;
+        last_layer_falls = current_layer_falls;
     }
-
-    println!("{:?}", disintigrate_falling_map);
+    disintigrate_falling_map
 }
 
 pub fn task2() -> crate::AOCResult<usize> {
@@ -235,13 +268,12 @@ pub fn task2() -> crate::AOCResult<usize> {
             .then_with(|| l.start.1.cmp(&r.start.1))
     });
     let stack = settle_bricks(&bricks);
-    let helper_maps = calculate_supporting_layers(&stack);
-    println!("{:?}", stack);
-    calculate_disintigration_falling_map(&helper_maps);
+    let m = calculate_disintigration_falling_map(&stack);
+    let r = m.values().sum();
 
     crate::AOCResult {
         day: 22,
         task: 1,
-        r: 0,
+        r,
     }
 }
