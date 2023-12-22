@@ -71,11 +71,13 @@ fn settle_bricks(snapshot: &Vec<Brick>) -> BTreeMap<usize, Vec<Brick>> {
     map
 }
 
-fn calculate_disintigratable_bricks(stack: &BTreeMap<usize, Vec<Brick>>) -> usize {
+fn calculate_supporting_layers(
+    stack: &BTreeMap<usize, Vec<Brick>>,
+) -> (BTreeMap<usize, Vec<usize>>, HashMap<usize, HashSet<usize>>) {
     let iter = stack.iter().rev();
     let mut supports_bricks_map = HashMap::new();
-    let mut cnt = 0;
     let mut seen_bricks = HashSet::new();
+    let mut layer_pillar_map = BTreeMap::new();
     for (layer_num, layer_bricks) in iter {
         for brick in layer_bricks {
             if supports_bricks_map.contains_key(&brick.id) {
@@ -97,18 +99,35 @@ fn calculate_disintigratable_bricks(stack: &BTreeMap<usize, Vec<Brick>>) -> usiz
             if seen_bricks.contains(&brick_to_check.id) {
                 continue;
             }
+            layer_pillar_map
+                .entry(*layer_num)
+                .or_insert_with(Vec::new)
+                .push(brick_to_check.id);
+            seen_bricks.insert(brick_to_check.id);
+        }
+    }
+    (layer_pillar_map, supports_bricks_map)
+}
+
+fn calculate_disintigratable_bricks(
+    layer_pillar_map: &BTreeMap<usize, Vec<usize>>,
+    supports_bricks_map: &HashMap<usize, HashSet<usize>>,
+) -> usize {
+    let mut cnt = 0;
+
+    for pillars in layer_pillar_map.values() {
+        for brick_to_check in pillars {
             let mut hs: HashSet<usize> = HashSet::new();
-            for other in layer_bricks {
-                if other.id == brick_to_check.id {
+            for other in pillars {
+                if brick_to_check == other {
                     continue;
                 }
-                hs.extend(supports_bricks_map.get(&other.id).unwrap());
+                hs.extend(supports_bricks_map.get(other).unwrap());
             }
-            let a = supports_bricks_map.get(&brick_to_check.id).unwrap();
+            let a = supports_bricks_map.get(brick_to_check).unwrap();
             if a.difference(&hs).count() == 0 {
                 cnt += 1;
             }
-            seen_bricks.insert(brick_to_check.id);
         }
     }
 
@@ -124,8 +143,9 @@ pub fn task1() -> crate::AOCResult<usize> {
             .then_with(|| l.start.0.cmp(&r.start.0))
             .then_with(|| l.start.1.cmp(&r.start.1))
     });
-    let map = settle_bricks(&bricks);
-    let r = calculate_disintigratable_bricks(&map);
+    let stack = settle_bricks(&bricks);
+    let (layer_pillar_map, supports_bricks_map) = calculate_supporting_layers(&stack);
+    let r = calculate_disintigratable_bricks(&layer_pillar_map, &supports_bricks_map);
 
     crate::AOCResult {
         day: 22,
