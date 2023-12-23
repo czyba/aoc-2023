@@ -86,4 +86,5 @@ fn main() {
     measure_time(day22::task1);
     measure_time(day22::task2);
     measure_time(day23::task1);
+    measure_time(day23::task2);
 }
