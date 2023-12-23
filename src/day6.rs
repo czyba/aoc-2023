@@ -61,9 +61,19 @@ pub fn task1() -> crate::AOCResult<u32> {
 }
 
 pub fn task2() -> crate::AOCResult<u32> {
+    let races = parse();
+    let a = races
+        .iter()
+        .fold((String::new(), String::new()), |acc, race| {
+            (
+                format!("{}{}", acc.0, race.time),
+                format!("{}{}", acc.1, race.distance),
+            )
+        });
+
     let race = Race {
-        time: 54817088,
-        distance: 446129210351007,
+        time: a.0.parse().unwrap(),
+        distance: a.1.parse().unwrap(),
     };
     let possibilities = race.count_possible_wins();
 
