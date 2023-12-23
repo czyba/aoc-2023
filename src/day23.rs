@@ -95,13 +95,13 @@ fn follow_path(
     Some((cur, steps))
 }
 
+type SuccessorMap = HashMap<(usize, usize), HashSet<(usize, usize)>>;
+type InteresectionStepMap = HashMap<((usize, usize), (usize, usize)), usize>;
+
 fn steps_between_intersections(
     input: &[String],
     intersections: &HashSet<(usize, usize)>,
-) -> (
-    HashMap<(usize, usize), HashSet<(usize, usize)>>,
-    HashMap<((usize, usize), (usize, usize)), usize>,
-) {
+) -> (SuccessorMap, InteresectionStepMap) {
     let mut successors = HashMap::new();
     let mut steps_between_intersections = HashMap::new();
     for intersection in intersections {
@@ -179,32 +179,77 @@ fn steps_between_intersections(
     (successors, steps_between_intersections)
 }
 
-fn find_all_paths(input: &[String], start: (usize, usize)) -> usize {
+type USuccessorMap = HashMap<u32, Vec<u32>>;
+type UInteresectionStepMap = HashMap<(u32, u32), usize>;
+
+fn map_to_u64(
+    successor_map: &SuccessorMap,
+    intersection_step_map: &InteresectionStepMap,
+    last: (usize, usize),
+) -> (USuccessorMap, UInteresectionStepMap) {
+    let mut mappings: HashMap<(usize, usize), u32> = HashMap::new();
+    mappings.insert((0, 1), 0);
+    mappings.insert(last, 1);
+
+    let mut num = 2;
+
+    for (l, r) in intersection_step_map.keys() {
+        mappings.entry(*l).or_insert_with(|| {
+            num += 1;
+            num
+        });
+        mappings.entry(*r).or_insert_with(|| {
+            num += 1;
+            num
+        });
+    }
+
+    (
+        successor_map
+            .iter()
+            .map(|(k, v)| {
+                (
+                    *mappings.get(k).unwrap(),
+                    v.iter().map(|s| *mappings.get(s).unwrap()).collect(),
+                )
+            })
+            .collect(),
+        intersection_step_map
+            .iter()
+            .map(|((l, r), v)| ((*mappings.get(l).unwrap(), *mappings.get(r).unwrap()), *v))
+            .collect(),
+    )
+}
+
+fn find_all_paths(input: &[String]) -> usize {
     let intersections = find_intersections(input);
+    let final_col = input[input.len() - 1].find('.').unwrap();
     let (successors, steps_between_intersections) =
         steps_between_intersections(input, &intersections);
-    let mut start_path = HashSet::new();
-    start_path.insert(start);
 
-    let mut worklist = vec![(start_path, start, 0)];
+    let (s_m, i_s_m) = map_to_u64(
+        &successors,
+        &steps_between_intersections,
+        (input.len() - 1, final_col),
+    );
+
+    let start_seen = 1u64;
+
+    let mut worklist = vec![(start_seen, 0u32, 0)];
 
     let mut max_steps = 0;
 
     while let Some((path, intersection, steps)) = worklist.pop() {
-        for succ in successors.get(&intersection).unwrap() {
-            if path.contains(succ) {
+        for succ in s_m.get(&intersection).unwrap() {
+            if path & (1 << succ) != 0 {
                 continue;
             }
-            let steps = steps
-                + steps_between_intersections
-                    .get(&(intersection, *succ))
-                    .unwrap();
-            if succ.0 == input.len() - 1 {
+            let steps = steps + i_s_m.get(&(intersection, *succ)).unwrap();
+            if *succ == 1 {
                 max_steps = max_steps.max(steps);
                 continue;
             }
-            let mut new_path = path.clone();
-            new_path.insert(*succ);
+            let new_path = path | 1 << succ;
             worklist.push((new_path, *succ, steps));
         }
     }
@@ -213,8 +258,7 @@ fn find_all_paths(input: &[String], start: (usize, usize)) -> usize {
 
 pub fn task1() -> crate::AOCResult<usize> {
     let input = parse();
-    let start = (0, 1);
-    let r = find_all_paths(&input, start);
+    let r = find_all_paths(&input);
 
     crate::AOCResult {
         day: 23,
@@ -225,11 +269,10 @@ pub fn task1() -> crate::AOCResult<usize> {
 
 pub fn task2() -> crate::AOCResult<usize> {
     let mut input = parse();
-    let start = (0, 1);
     input.iter_mut().for_each(|s| {
         *s = s.replace(['>', 'v'], ".");
     });
-    let r = find_all_paths(&input, start);
+    let r = find_all_paths(&input);
 
     crate::AOCResult {
         day: 23,
