@@ -13,6 +13,7 @@ mod day2;
 mod day20;
 mod day21;
 mod day22;
+mod day23;
 mod day3;
 mod day4;
 mod day5;
@@ -84,4 +85,5 @@ fn main() {
     measure_time(day21::task2);
     measure_time(day22::task1);
     measure_time(day22::task2);
+    measure_time(day23::task1);
 }
