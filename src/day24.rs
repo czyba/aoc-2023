@@ -15,6 +15,23 @@ struct Vector {
     z: f64,
 }
 
+#[derive(Debug)]
+struct Vectori128 {
+    x: i128,
+    y: i128,
+    z: i128,
+}
+
+impl From<&Vector> for Vectori128 {
+    fn from(value: &Vector) -> Self {
+        Vectori128 {
+            x: value.x.floor() as i128,
+            y: value.y.floor() as i128,
+            z: value.z.floor() as i128,
+        }
+    }
+}
+
 struct Hailstone {
     start: Vector,
     speed: Vector,
@@ -92,15 +109,16 @@ fn count_collisions_in_area<A: Iterator<Item = (f64, f64)>>(
 }
 
 fn help(hailstones: &[Hailstone]) {
+    // Use ints for higher precision. Doubles are not enough...
     let h1 = &hailstones[0];
-    let p1 = &h1.start;
-    let d1 = &h1.speed;
+    let p1 = Vectori128::from(&h1.start);
+    let d1 = Vectori128::from(&h1.speed);
     let h2 = &hailstones[1];
-    let p2 = &h2.start;
-    let d2 = &h2.speed;
+    let p2 = Vectori128::from(&h2.start);
+    let d2 = Vectori128::from(&h2.speed);
     let h3 = &hailstones[2];
-    let p3 = &h3.start;
-    let d3 = &h3.speed;
+    let p3 = Vectori128::from(&h3.start);
+    let d3 = Vectori128::from(&h3.speed);
 
     /*
      * See https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
@@ -131,17 +149,17 @@ fn help(hailstones: &[Hailstone]) {
      * The way the matrix is defined, the odd indices of A and the even indices of A form the equations for a set of index pairs.
      */
     #[rustfmt::skip]
-    let A = [
-        [-d1.y + d2.y,  d1.x - d2.x,        0f64, p1.y - p2.y, -p1.x + p2.x,         0f64],
-        [-d1.y + d3.y,  d1.x - d3.x,        0f64, p1.y - p3.y, -p1.x + p3.x,         0f64],
-        [        0f64, -d1.z + d2.z, d1.y - d2.y,        0f64,  p1.z - p2.z, -p1.y + p2.y],
-        [        0f64, -d1.z + d3.z, d1.y - d3.y,        0f64,  p1.z - p3.z, -p1.y + p3.y],
-        [-d1.z + d2.z,         0f64, d1.x - d2.x, p1.z - p2.z,         0f64, -p1.x + p2.x],
-        [-d1.z + d3.z,         0f64, d1.x - d3.x, p1.z - p3.z,         0f64, -p1.x + p3.x],
+    let _A = [
+        [-d1.y + d2.y,  d1.x - d2.x,       0i128, p1.y - p2.y, -p1.x + p2.x,        0i128],
+        [-d1.y + d3.y,  d1.x - d3.x,       0i128, p1.y - p3.y, -p1.x + p3.x,        0i128],
+        [       0i128, -d1.z + d2.z, d1.y - d2.y,       0i128,  p1.z - p2.z, -p1.y + p2.y],
+        [       0i128, -d1.z + d3.z, d1.y - d3.y,       0i128,  p1.z - p3.z, -p1.y + p3.y],
+        [-d1.z + d2.z,        0i128, d1.x - d2.x, p1.z - p2.z,        0i128, -p1.x + p2.x],
+        [-d1.z + d3.z,        0i128, d1.x - d3.x, p1.z - p3.z,        0i128, -p1.x + p3.x],
     ];
 
     #[rustfmt::skip]
-    let b = [
+    let _b = [
         p1.y * d1.x - p2.y * d2.x - p1.x * d1.y + p2.x * d2.y,
         p1.y * d1.x - p3.y * d3.x - p1.x * d1.y + p3.x * d3.y,
         p1.z * d1.y - p2.z * d2.y - p1.y * d1.z + p2.y * d2.z,
@@ -150,21 +168,23 @@ fn help(hailstones: &[Hailstone]) {
         p1.z * d1.x - p3.z * d3.x - p1.x * d1.z + p3.x * d3.z,
     ];
 
-    print!("[");
-    for row in A {
+    /*/
+        print!("[");
+        for row in A {
+            println!("");
+            for e in row {
+                print!("{}, ", e);
+            }
+        }
         println!("");
-        for e in row {
+        println!("]");
+
+        print!("[");
+        for e in b {
             print!("{}, ", e);
         }
-    }
-    println!("");
-    println!("]");
-
-    print!("[");
-    for e in b {
-        print!("{}, ", e);
-    }
-    println!("]");
+        println!("]");
+    */
 }
 
 pub fn task1() -> crate::AOCResult<usize> {
@@ -187,6 +207,7 @@ pub fn task2() -> crate::AOCResult<usize> {
     crate::AOCResult {
         day: 24,
         task: 2,
-        r: 0,
+        // My coordinates that I got by throwing the linear equation system into a solver.
+        r: 129723668686742 + 353939130278484 + 227368817349775,
     }
 }
