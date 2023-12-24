@@ -132,12 +132,12 @@ fn help(hailstones: &[Hailstone]) {
      */
     #[rustfmt::skip]
     let A = [
-        [-d1.y + d2.y, d1.x - d2.x, 0f64, p1.y - p2.y, -p1.x + p2.x, 0f64],
-        [-d1.y + d3.y, d1.x - d3.x, 0f64, p1.y - p3.y, -p1.x + p3.x, 0f64],
-        [0f64, -d1.z + d2.z, d1.y - d2.y, 0f64, p1.z - p2.z, -p1.y + p2.y],
-        [0f64, -d1.z + d3.z, d1.y - d3.y, 0f64, p1.z - p3.z, -p1.y + p3.y],
-        [-d1.z + d2.z, 0f64, d1.x - d2.x, p1.z - p2.z, 0f64, -p1.x + p2.x],
-        [-d1.z + d3.z, 0f64, d1.x - d3.x, p1.z - p3.z, 0f64, -p1.x + p3.x],
+        [-d1.y + d2.y,  d1.x - d2.x,        0f64, p1.y - p2.y, -p1.x + p2.x,         0f64],
+        [-d1.y + d3.y,  d1.x - d3.x,        0f64, p1.y - p3.y, -p1.x + p3.x,         0f64],
+        [        0f64, -d1.z + d2.z, d1.y - d2.y,        0f64,  p1.z - p2.z, -p1.y + p2.y],
+        [        0f64, -d1.z + d3.z, d1.y - d3.y,        0f64,  p1.z - p3.z, -p1.y + p3.y],
+        [-d1.z + d2.z,         0f64, d1.x - d2.x, p1.z - p2.z,         0f64, -p1.x + p2.x],
+        [-d1.z + d3.z,         0f64, d1.x - d3.x, p1.z - p3.z,         0f64, -p1.x + p3.x],
     ];
 
     #[rustfmt::skip]
