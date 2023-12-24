@@ -102,6 +102,34 @@ fn help(hailstones: &[Hailstone]) {
     let p3 = &h3.start;
     let d3 = &h3.speed;
 
+    /*
+     * See https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+     * v x w is the cross product.
+     * We are in 3 dimensional space.
+     * We want for all i
+     *
+     *      p + t * d = p_i + t * d_i
+     * <=> (p - p_i) = t * (d_i - d)
+     * <=> (p - p_i) = -t * (d * d_i)
+     *
+     * => (p - p_i) x -t * (d - d_i)
+     *
+     * Since -t is a scalar (p - p_i) and (d - d_i) are parallel to each other. Means we can essentially ignore t
+     *
+     * => (p - p_i) x (d - d_i) = 0
+     *
+     * Now, taking two i, for example i = 0 and 1, we can equate:
+     * 
+     * (p - p_1) x (d - d_1) = (p - p_2) x (d - d_2)
+     *
+     * This can be tediously resolved to a linear equation of the form A * x = b, where
+     * x := (p_x, p_y, p_z, d_x, d_y, d_z)^T
+     *
+     * The matrix A and vector b are defined below. Note that each pair of indices gives us 3 equations, for 6 unknowns.
+     * Therefore we need 2 pairs of points to solve this equation.
+     *
+     * The way the matrix is defined, the odd indices of A and the even indices of A form the equations for a set of index pairs.
+     */
     #[rustfmt::skip]
     let A = [
         [-d1.y + d2.y, d1.x - d2.x, 0f64, p1.y - p2.y, -p1.x + p2.x, 0f64],
