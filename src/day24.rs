@@ -8,6 +8,7 @@ fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<impl Iterator<Item 
     Ok(reader.lines().map(|l| l.expect("Could not parse line")))
 }
 
+#[derive(Debug)]
 struct Vector {
     x: f64,
     y: f64,
@@ -90,6 +91,38 @@ fn count_collisions_in_area<A: Iterator<Item = (f64, f64)>>(
         .count()
 }
 
+fn help(hailstones: &[Hailstone]) {
+    let h1 = &hailstones[0];
+    let p1 = &h1.start;
+    let d1 = &h1.speed;
+    let h2 = &hailstones[1];
+    let p2 = &h2.start;
+    let d2 = &h2.speed;
+    let h3 = &hailstones[2];
+    let p3 = &h3.start;
+    let d3 = &h3.speed;
+
+    #[rustfmt::skip]
+    let A = [
+        [-d1.y + d2.y, d1.x - d2.x, 0f64, p1.y - p2.y, -p1.x + p2.x, 0f64],
+        [-d1.y + d3.y, d1.x - d3.x, 0f64, p1.y - p3.y, -p1.x + p3.x, 0f64],
+        [0f64, -d1.z + d2.z, d1.y - d2.y, 0f64, p1.z - p2.z, -p1.y + p2.y],
+        [0f64, -d1.z + d3.z, d1.y - d3.y, 0f64, p1.z - p3.z, -p1.y + p3.y],
+        [-d1.z + d2.z, 0f64, d1.x - d2.x, p1.z - p2.z, 0f64, -p1.x + p2.x],
+        [-d1.z + d3.z, 0f64, d1.x - d3.x, p1.z - p3.z, 0f64, -p1.x + p3.x],
+    ];
+
+    #[rustfmt::skip]
+    let b = [
+        p1.y * d1.x - p2.y * d2.x - p1.x * d1.y + p2.x * d2.y,
+        p1.y * d1.x - p3.y * d3.x - p1.x * d1.y + p3.x * d3.y,
+        p1.z * d1.y - p2.z * d2.y - p1.y * d1.z + p2.y * d2.z,
+        p1.z * d1.y - p3.z * d3.y - p1.y * d1.z + p3.y * d3.z,
+        p1.z * d1.x - p2.z * d2.x - p1.x * d1.z + p2.x * d2.z,
+        p1.z * d1.x - p3.z * d3.x - p1.x * d1.z + p3.x * d3.z,
+    ];
+}
+
 pub fn task1() -> crate::AOCResult<usize> {
     let hailstones = parse();
     let collisions = collisions_x_y(&hailstones);
@@ -100,5 +133,16 @@ pub fn task1() -> crate::AOCResult<usize> {
         day: 24,
         task: 1,
         r: count,
+    }
+}
+
+pub fn task2() -> crate::AOCResult<usize> {
+    let hailstones = parse();
+    help(&hailstones);
+
+    crate::AOCResult {
+        day: 24,
+        task: 2,
+        r: 0,
     }
 }
