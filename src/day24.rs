@@ -149,6 +149,22 @@ fn help(hailstones: &[Hailstone]) {
         p1.z * d1.x - p2.z * d2.x - p1.x * d1.z + p2.x * d2.z,
         p1.z * d1.x - p3.z * d3.x - p1.x * d1.z + p3.x * d3.z,
     ];
+
+    print!("[");
+    for row in A {
+        println!("");
+        for e in row {
+            print!("{}, ", e);
+        }
+    }
+    println!("");
+    println!("]");
+
+    print!("[");
+    for e in b {
+        print!("{}, ", e);
+    }
+    println!("]");
 }
 
 pub fn task1() -> crate::AOCResult<usize> {
